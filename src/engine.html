@@ -897,7 +897,10 @@ async function callAI(system, messages) {
   const res = await fetch(c.url, {
     method: 'POST',
     headers: { 'content-type': 'application/json', authorization: 'Bearer ' + c.key },
-    body: JSON.stringify({ model: c.model, max_tokens: 700, stream: false, messages: [{ role: 'system', content: system }].concat(messages) }),
+    body: JSON.stringify(Object.assign(
+      { model: c.model, max_tokens: 700, stream: false, messages: [{ role: 'system', content: system }].concat(messages) },
+      // DeepSeek thinks by default; a tutor hint needs a quick, short answer instead
+      AI.provider === 'deepseek' ? { thinking: { type: 'disabled' } } : {})),
   });
   if (!res.ok) throw await readError(res);
   const j = await res.json();
