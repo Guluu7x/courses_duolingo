@@ -200,7 +200,11 @@ code{background:var(--soft);border-radius:6px;padding:1px 5px;font-size:.92em}
 #tutor textarea{flex:1;resize:none;height:46px;border:2px solid var(--line);border-radius:12px;padding:10px;font:inherit;font-size:15px;background:var(--soft);color:var(--ink)}
 #tutor form .btn{padding:0 14px;min-height:46px}
 #tutor details{padding:0 14px calc(10px + env(safe-area-inset-bottom,0px));font-size:12px;color:var(--muted)}
-#tutor details input{width:100%;margin-top:6px;padding:8px;border:2px solid var(--line);border-radius:10px;background:var(--soft);color:var(--ink);font:inherit}
+#tutor details{max-height:55%;overflow-y:auto}
+#tutor details summary{cursor:pointer;font-weight:800;font-size:13px;color:var(--blue);padding:4px 0}
+#tutor details label{display:block;margin-top:8px;font-weight:700;color:var(--ink);font-size:13px}
+#tutor details input,#tutor details select{display:block;width:100%;margin-top:4px;padding:8px;border:2px solid var(--line);border-radius:10px;background:var(--soft);color:var(--ink);font:inherit;font-size:14px}
+#tutor details p{margin:8px 0 0}
 #scrim{position:fixed;inset:0;background:rgba(0,0,0,.25);z-index:19}
 
 .toast{position:fixed;left:50%;top:calc(76px + env(safe-area-inset-top,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-weight:700;font-size:14px;z-index:30;box-shadow:var(--shadow)}
@@ -221,9 +225,17 @@ code{background:var(--soft);border-radius:6px;padding:1px 5px;font-size:.92em}
   <div class="msgs" id="tutor-msgs"></div>
   <div class="chips" id="tutor-chips"></div>
   <form id="tutor-form"><textarea id="tutor-input" placeholder="问点什么…" aria-label="向助教提问"></textarea><button class="btn blue" type="submit">发送</button></form>
-  <details><summary>助教需要 Anthropic API key（可选）</summary>
-    AI 助教需要你自己的 Anthropic API key。key 只保存在这台设备的浏览器里，只会发送到 api.anthropic.com。不填也不影响闯关。
-    <input id="tutor-key" type="password" placeholder="sk-ant-…" autocomplete="off">
+  <details id="ai-settings"><summary>⚙️ AI 助教设置</summary>
+    <label for="ai-provider">服务商
+      <select id="ai-provider">
+        <option value="deepseek">DeepSeek</option>
+        <option value="anthropic">Claude（Anthropic）</option>
+        <option value="openai">其他（OpenAI 兼容接口）</option>
+      </select></label>
+    <label for="ai-url">接口地址<input id="ai-url" type="url" autocomplete="off" spellcheck="false"></label>
+    <label for="ai-model">模型<input id="ai-model" type="text" autocomplete="off" spellcheck="false"></label>
+    <label for="ai-key">API key<input id="ai-key" type="password" autocomplete="off" spellcheck="false" placeholder="粘贴你的 key"></label>
+    <p>key 只保存在这台设备的浏览器里，只会发送到上面的接口地址。不填也不影响闯关，只是用不了助教。</p>
   </details>
 </aside>
 
@@ -322,7 +334,6 @@ document.title = (COURSE.short || COURSE.title) + ' · __SITE_TITLE__';
 
 /* ================= storage ================= */
 const KEY = 'duolingo:' + (COURSE.id || 'course');
-const KEY_API = 'duolingo:apikey';
 const fresh = () => ({ v: 1, xp: 0, completed: {}, review: [], session: null, stats: { answered: 0, correct: 0 } });
 let S = fresh();
 let storeMode = 'memory';
@@ -843,18 +854,55 @@ function systemPrompt(ctx) {
     cur ? '--- LESSON NOTES ---\n' + lessonNotes() : '',
   ].filter(Boolean).join('\n\n');
 }
-function getKey() { try { return localStorage.getItem(KEY_API) || ''; } catch (e) { return ''; } }
-async function callClaude(system, messages) {
-  const headers = { 'content-type': 'application/json' };
-  const key = getKey();
-  if (key) Object.assign(headers, { 'x-api-key': key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' });
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST', headers,
-    body: JSON.stringify({ model: (COURSE.tutor && COURSE.tutor.model) || 'claude-sonnet-5-5', max_tokens: 700, system, messages }),
+/* AI settings: one provider at a time, a key per provider, all kept in this browser only */
+const AI_KEY = 'duolingo:ai';
+const AI_DEFAULTS = {
+  deepseek: { url: 'https://api.deepseek.com/chat/completions', model: 'deepseek-flash' },
+  anthropic: { url: 'https://api.anthropic.com/v1/messages', model: 'claude-sonnet-5-5' },
+  openai: { url: '', model: '' },
+};
+function loadAI() {
+  let c = null;
+  try { c = JSON.parse(localStorage.getItem(AI_KEY) || 'null'); } catch (e) { c = null; }
+  c = c && typeof c === 'object' ? c : {};
+  c.provider = AI_DEFAULTS[c.provider] ? c.provider : 'deepseek';
+  c.cfg = c.cfg || {};
+  for (const p of Object.keys(AI_DEFAULTS)) c.cfg[p] = Object.assign({ key: '' }, AI_DEFAULTS[p], c.cfg[p] || {});
+  return c;
+}
+let AI = loadAI();
+function saveAI() { try { localStorage.setItem(AI_KEY, JSON.stringify(AI)); return true; } catch (e) { return false; } }
+const aiCfg = () => AI.cfg[AI.provider];
+const aiReady = () => !!(aiCfg().key && aiCfg().url && aiCfg().model);
+async function readError(res) {
+  let m = res.status + '';
+  try { const j = await res.json(); const e = j.error; m += ' ' + ((e && (e.message || e)) || j.message || ''); } catch (e) { /* no body */ }
+  return new Error(m.trim());
+}
+async function callAI(system, messages) {
+  const c = aiCfg();
+  if (!c.key) throw new Error('还没有填写 API key');
+  if (!c.url || !c.model) throw new Error('接口地址或模型没有填写');
+  if (AI.provider === 'anthropic') {
+    const res = await fetch(c.url, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-api-key': c.key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+      body: JSON.stringify({ model: c.model, max_tokens: 700, system, messages }),
+    });
+    if (!res.ok) throw await readError(res);
+    const j = await res.json();
+    return (j.content || []).filter(b => b.type === 'text').map(b => b.text).join('\n').trim() || '（没有回复）';
+  }
+  // DeepSeek and other OpenAI-compatible chat completions APIs
+  const res = await fetch(c.url, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', authorization: 'Bearer ' + c.key },
+    body: JSON.stringify({ model: c.model, max_tokens: 700, stream: false, messages: [{ role: 'system', content: system }].concat(messages) }),
   });
-  if (!res.ok) { let m = res.status + ''; try { const j = await res.json(); m += ' ' + (j.error && j.error.message || ''); } catch (e) {} throw new Error(m); }
+  if (!res.ok) throw await readError(res);
   const j = await res.json();
-  return (j.content || []).filter(b => b.type === 'text').map(b => b.text).join('\n').trim() || '(no reply)';
+  const msg = j.choices && j.choices[0] && j.choices[0].message;
+  return (msg && typeof msg.content === 'string' ? msg.content : '').trim() || '（没有回复）';
 }
 
 function tutorSync() {
@@ -870,12 +918,12 @@ function tutorSync() {
 }
 function maybeAuto(ctx) {
   const k = ctx.key + '|' + ctx.phase;
-  if (!AUTO[ctx.phase] || T.auto.has(k) || T.busy) return;
+  if (!AUTO[ctx.phase] || T.auto.has(k) || T.busy || !aiReady()) return;
   T.auto.add(k); ask(AUTO[ctx.phase], true);
 }
 function paintMsgs() {
   const box = $('#tutor-msgs'); box.innerHTML = '';
-  if (!T.msgs.length && !T.busy) box.append(h('div', { class: 'msg bot' }, cur ? '关于这一题，随便问。作答前我只给提示，作答后再详细讲解。' : '你好！打开一关，我就能帮你看正在做的题。'));
+  if (!T.msgs.length && !T.busy) box.append(h('div', { class: 'msg bot' }, !aiReady() ? '先在下方“AI 助教设置”里选服务商、填 API key，我就能帮你了。' : cur ? '关于这一题，随便问。作答前我只给提示，作答后再详细讲解。' : '你好！打开一关，我就能帮你看正在做的题。'));
   T.msgs.forEach(m => {
     if (m.role === 'sys') box.append(h('div', { class: 'msg sys' }, '— ' + m.text + ' —'));
     else if (m.role === 'err') box.append(h('div', { class: 'msg err' }, m.text));
@@ -897,14 +945,15 @@ async function ask(text) {
     if (last && last.role === m.role) last.content += '\n\n' + m.text; else apiMsgs.push({ role: m.role, content: m.text });
   });
   try {
-    const reply = await callClaude(systemPrompt(ctx), apiMsgs);
+    const reply = await callAI(systemPrompt(ctx), apiMsgs);
     if (T.itemKey === itemAtSend) T.msgs.push({ role: 'assistant', text: reply });
   } catch (err) {
-    if (T.itemKey === itemAtSend) T.msgs.push({ role: 'err', text: `助教连接失败（${err.message}）。请在下方填写 Anthropic API key 后再试。` });
+    if (T.itemKey === itemAtSend) T.msgs.push({ role: 'err', text: `助教连接失败（${err.message}）。请检查下方“AI 助教设置”里的服务商、模型和 API key。` });
   } finally { T.busy = false; paintMsgs(); }
 }
 function openTutor() {
   T.open = true; tutorEl.classList.add('open'); tutorEl.setAttribute('aria-hidden', 'false'); scrim.hidden = false;
+  if (!aiReady()) $('#ai-settings').open = true;
   tutorSync();
   setTimeout(() => { if (matchMedia('(pointer:fine)').matches) $('#tutor-input').focus(); }, 60);
 }
@@ -913,9 +962,19 @@ $('#tutor-close').addEventListener('click', closeTutor);
 scrim.addEventListener('click', closeTutor);
 $('#tutor-form').addEventListener('submit', e => { e.preventDefault(); const i = $('#tutor-input'); const v = i.value; i.value = ''; ask(v); });
 $('#tutor-input').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); $('#tutor-form').requestSubmit(); } });
-const keyInp = $('#tutor-key');
-keyInp.value = getKey();
-keyInp.addEventListener('change', () => { try { keyInp.value.trim() ? localStorage.setItem(KEY_API, keyInp.value.trim()) : localStorage.removeItem(KEY_API); toast('API key 已保存在这台设备'); } catch (e) { toast('这里无法保存 key'); } });
+const aiProv = $('#ai-provider'), aiUrl = $('#ai-url'), aiModel = $('#ai-model'), aiKeyInp = $('#ai-key');
+function paintAI() {
+  const c = aiCfg();
+  aiProv.value = AI.provider; aiUrl.value = c.url; aiModel.value = c.model; aiKeyInp.value = c.key;
+  aiUrl.placeholder = AI.provider === 'openai' ? 'https://…/v1/chat/completions' : '';
+  aiModel.placeholder = AI.provider === 'openai' ? '模型名称' : '';
+}
+function storeAI(msg) { toast(saveAI() ? msg : '这里无法保存设置'); paintMsgs(); }
+aiProv.addEventListener('change', () => { AI.provider = aiProv.value; paintAI(); storeAI('已切换到 ' + aiProv.options[aiProv.selectedIndex].text); });
+aiUrl.addEventListener('change', () => { aiCfg().url = aiUrl.value.trim(); storeAI('接口地址已保存'); });
+aiModel.addEventListener('change', () => { aiCfg().model = aiModel.value.trim(); storeAI('模型已保存'); });
+aiKeyInp.addEventListener('change', () => { aiCfg().key = aiKeyInp.value.trim(); storeAI(aiCfg().key ? 'API key 已保存在这台设备' : 'API key 已删除'); });
+paintAI();
 
 /* ================= boot ================= */
 window.__duo = { get state() { return S; }, get cur() { return cur; }, save, tutor: T, systemPrompt: () => systemPrompt(tutorCtx()) };
