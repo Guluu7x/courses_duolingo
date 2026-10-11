@@ -1,3 +1,4 @@
 [
-  { "file": "pandas-seaborn.json", "short": "Pandas + Seaborn", "icon": "🐼" }
+  {"file": "pandas-seaborn.json", "short": "Pandas + Seaborn", "icon": "🐼"},
+  {"file": "lecture7-comprehension-numpy.json", "short": "推导式 + NumPy", "icon": "🧩"}
 ]
