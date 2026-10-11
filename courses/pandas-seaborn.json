@@ -1,0 +1,1508 @@
+{
+  "title": "Pandas + Seaborn 闯关",
+  "subtitle": "从表格到统计图：8 个单元，按 pandas 3.0 和 seaborn 0.13.2 编写",
+  "id": "pandas-seaborn-basics",
+  "tutor": {
+    "model": "claude-sonnet-5-5",
+    "context": "This course is for a Chinese-speaking beginner (basic Python, little stats). It is built from the pandas 3.0.6 '10 minutes to pandas' page, the seaborn 0.13.2 introduction page, and the learner's lecture slides on iloc, regplot, fill_between and scipy.stats.linregress. Answer in Chinese, keep code/function names in English, and use the course's student score table (name, class, math, english; Lily's math is NaN) in examples. Flags note: the slide's iloc examples mix 1-based and 0-based row counting; fill_between draws its own band rather than restyling regplot's built-in band; the first slide version of get_regression has no return."
+  },
+  "units": [
+    {
+      "title": "pandas 的两个核心对象",
+      "description": "Series、DataFrame 和每一列的数据类型。",
+      "lessons": [
+        {
+          "title": "Series 和 DataFrame",
+          "steps": [
+            {
+              "type": "card",
+              "title": "pandas 是“用代码操作 Excel”",
+              "body": "pandas 专门处理**表格数据**。读数据、清洗、筛选、分组统计都靠它。\n\n惯例写法是 `import pandas as pd`，之后用 `pd.xxx` 调用。"
+            },
+            {
+              "type": "card",
+              "title": "整张表 = DataFrame",
+              "body": "下面这张成绩表叫 `df`，后面的题都用它。\n\n- **DataFrame**：整张表\n- **Series**：其中一列，每个值都带标签\n- **index**：最左边的行标签 0、1、2、3\n- **columns**：最上面的列名",
+              "equation": "   name class  math  english\n0   Tom     A  85.0       70\n1   Amy     B  92.0       88\n2   Bob     A  78.0       95\n3  Lily     B   NaN       80"
+            },
+            {
+              "type": "match",
+              "prompt": "把术语和含义配对。",
+              "pairs": [
+                [
+                  "Series",
+                  "带标签的一列"
+                ],
+                [
+                  "DataFrame",
+                  "多列组成的整张表"
+                ],
+                [
+                  "index",
+                  "行标签"
+                ],
+                [
+                  "columns",
+                  "列名"
+                ]
+              ],
+              "explain": "DataFrame 由多个 Series 组成，它们共用同一套 index。"
+            },
+            {
+              "type": "mcq",
+              "prompt": "`df[\"math\"]` 取出一列，得到的是什么？",
+              "options": [
+                "一个 Series",
+                "一个 DataFrame",
+                "一个 Python list",
+                "一个 dict"
+              ],
+              "answer": 0,
+              "why": [
+                "",
+                "取多列才得到 DataFrame。",
+                "它保留了行标签，比 list 多了 index。",
+                "dict 没有行标签和统计方法。"
+              ],
+              "explain": "单列就是一个带标签的一维数据，也就是 Series。"
+            },
+            {
+              "type": "card",
+              "title": "用字典创建 DataFrame",
+              "body": "字典的**键**变成列名，**值**变成这一列的数据。",
+              "equation": "pd.DataFrame({\"name\": [\"Tom\", \"Amy\"],\n              \"math\": [85, 92]})"
+            },
+            {
+              "type": "mcq",
+              "prompt": "`pd.DataFrame({\"name\": [...], \"math\": [...]})` 里，`\"name\"` 变成了什么？",
+              "options": [
+                "列名",
+                "行标签",
+                "表的名字",
+                "第一行数据"
+              ],
+              "answer": 0,
+              "why": [
+                "",
+                "行标签默认是 0、1、2…，不来自键。",
+                "DataFrame 本身没有名字这一项。",
+                "数据来自值，也就是后面的列表。"
+              ],
+              "explain": "字典的键 → 列名，字典的值 → 列的数据。"
+            },
+            {
+              "type": "tf",
+              "statement": "一个 DataFrame 里所有列必须是同一种数据类型。",
+              "answer": false,
+              "explain": "每一列各有自己的类型。name 是文字，math 是小数，english 是整数，可以共存。"
+            }
+          ]
+        },
+        {
+          "title": "数据类型 dtype",
+          "steps": [
+            {
+              "type": "card",
+              "title": "dtype 是每一列的类型",
+              "body": "`df.dtypes` 列出每列的类型。\n\n- `int64`：整数\n- `float64`：小数\n- `str`：文字",
+              "equation": "name        str\nclass       str\nmath    float64\nenglish   int64"
+            },
+            {
+              "type": "card",
+              "title": "缺失值会把整数变成小数",
+              "body": "math 列原本都是整数，但 Lily 缺考，值是 `NaN`。\n\n`NaN` 本身属于小数类型，所以整列变成 `float64`。",
+              "flag": {
+                "title": "版本变化",
+                "text": "pandas 3.0 里文字列显示为 str。旧教程（pandas 2.x 及更早）里同样的列显示为 object。"
+              }
+            },
+            {
+              "type": "mcq",
+              "prompt": "`pd.Series([1, 2, np.nan]).dtype` 是什么？",
+              "options": [
+                "float64",
+                "int64",
+                "str",
+                "bool"
+              ],
+              "answer": 0,
+              "why": [
+                "",
+                "有 NaN 时整数存不下缺失值，会升级成小数。",
+                "这里没有文字。",
+                "这里没有 True/False。"
+              ],
+              "explain": "NaN 是小数类型，混进整数列后整列变成 float64。"
+            },
+            {
+              "type": "tf",
+              "statement": "在 pandas 3.0 里，`df.dtypes` 中文字列显示为 `str`。",
+              "answer": true,
+              "explain": "这是 3.0 的新默认。看到旧教程里的 object 不要慌，指的是同一种东西。"
+            },
+            {
+              "type": "tf",
+              "statement": "math 列变成 float64，是因为有人考了 85.5 这样带小数的分数。",
+              "answer": false,
+              "explain": "分数都是整数。真正原因是 Lily 的 NaN 属于小数类型。"
+            },
+            {
+              "type": "mcq",
+              "prompt": "想快速知道每一列是什么类型，用哪个？",
+              "options": [
+                "`df.dtypes`",
+                "`df.columns`",
+                "`df.index`",
+                "`df.shape`"
+              ],
+              "answer": 0,
+              "why": [
+                "",
+                "columns 只给列名。",
+                "index 是行标签。",
+                "shape 是行数和列数。"
+              ],
+              "explain": "`dtypes` 逐列列出数据类型。"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "查看与选择数据",
+      "description": "先看一眼，再精准取出想要的行和列。",
+      "lessons": [
+        {
+          "title": "先看一眼数据",
+          "steps": [
+            {
+              "type": "card",
+              "title": "拿到数据先做这几步",
+              "body": "- `df.head()`：前 5 行\n- `df.tail(3)`：后 3 行\n- `df.shape`：（行数，列数）\n- `df.describe()`：数字列的统计摘要\n- `df.sort_values(by=\"math\")`：按某列排序"
+            },
+            {
+              "type": "mcq",
+              "prompt": "`df.tail(2)` 显示哪两位学生？",
+              "options": [
+                "Bob 和 Lily",
+                "Tom 和 Amy",
+                "Amy 和 Bob",
+                "Tom 和 Lily"
+              ],
+              "answer": 0,
+              "why": [
+                "",
+                "那是开头两行，用 head(2)。",
+                "那是中间两行。",
+                "tail 取的是连续的最后几行。"
+              ],
+              "explain": "tail 从末尾往前取，最后两行是 Bob 和 Lily。"
+            },
+            {
+              "type": "numeric",
+              "prompt": "`df.shape` 返回 (行数, 列数)。成绩表 df 有 4 行，列数是多少？（行标签 index 不算列）",
+              "answer": 4,
+              "tolerance": 0.001,
+              "explain": "name、class、math、english 共 4 列，所以 shape 是 (4, 4)。"
+            },
+            {
+              "type": "card",
+              "title": "describe() 里的 mean 和 std",
+              "body": "- **mean（均值）**：平均分\n- **std（标准差）**：分数有多分散\n\n大家分数都差不多时，std 就小。"
+            },
+            {
+              "type": "tf",
+              "statement": "describe() 里某科的 std 很小，说明这科大家的分数差距很大。",
+              "answer": false,
+              "explain": "std 小代表分数集中，大家差不多。差距大时 std 才大。"
+            },
+            {
+              "type": "mcq",
+              "prompt": "想让数学分数**从高到低**排，`ascending=` 填什么？",
+              "options": [
+                "`False`",
+                "`True`",
+                "`\"desc\"`",
+                "`-1`"
+              ],
+              "answer": 0,
+              "why": [
+                "",
+                "True 是默认的从低到高。",
+                "pandas 不认这个字符串。",
+                "这个参数要布尔值。"
+              ],
+              "explain": "ascending 意思是“升序”，设成 False 就是降序。"
+            },
+            {
+              "type": "order",
+              "prompt": "拼出“按 english 列排序”的代码。",
+              "items": [
+                "df",
+                ".sort_values(",
+                "by=",
+                "\"english\"",
+                ")"
+              ],
+              "explain": "完整写法是 `df.sort_values(by=\"english\")`，结果默认从低到高。"
+            }
+          ]
+        },
+        {
+          "title": "选列，以及 loc 与 iloc",
+          "steps": [
+            {
+              "type": "card",
+              "title": "方括号选列",
+              "body": "- `df[\"math\"]`：一列 → Series\n- `df[[\"name\", \"math\"]]`：多列 → DataFrame\n\n外层括号表示“取”，内层是**列名的列表**。"
+            },
+            {
+              "type": "mcq",
+              "prompt": "列名是 `final score`（中间有空格），哪种写法能取到它？",
+              "options": [
+                "`df[\"final score\"]`",
+                "`df.final score`",
+                "`df.final_score`",
+                "`df(\"final score\")`"
+              ],
+              "answer": 0,
+              "why": [
+                "",
+                "点号写法遇到空格会语法错误。",
+                "列名里没有下划线，名字对不上。",
+                "圆括号是调用函数，不是取值。"
+              ],
+              "explain": "方括号加字符串最通用，任何列名都能用。"
+            },
+            {
+              "type": "card",
+              "title": "loc 按标签，iloc 按位置",
+              "body": "- `loc`：按**标签**选，切片**包含**终点\n- `iloc`：按**位置编号**选，从 0 数，切片**不含**终点\n\n写法都是 `[行, 列]`，`:` 表示全部。"
+            },
+            {
+              "type": "mcq",
+              "prompt": "`df.loc[0:2, \"name\"]` 返回哪些名字？",
+              "options": [
+                "Tom, Amy, Bob",
+                "Tom, Amy",
+                "Amy, Bob",
+                "Tom, Amy, Bob, Lily"
+              ],
+              "answer": 0,
+              "why": [
+                "",
+                "这是 iloc 的规则。loc 包含终点 2。",
+                "行标签从 0 开始，0 是 Tom。",
+                "终点 2 之后的 Lily 不在范围内。"
+              ],
+              "explain": "loc 按标签切片，0、1、2 都包含。"
+            },
+            {
+              "type": "mcq",
+              "prompt": "`df.iloc[0:2, 0]` 返回哪些名字？",
+              "options": [
+                "Tom, Amy",
+                "Tom, Amy, Bob",
+                "Amy, Bob",
+                "Tom"
+              ],
+              "answer": 0,
+              "why": [
+                "",
+                "iloc 不含终点，位置 2 的 Bob 被排除。",
+                "位置从 0 开始，0 是 Tom。",
+                "0:2 是一段范围，不只一行。"
+              ],
+              "explain": "iloc 前闭后开：取位置 0 和 1。"
+            },
+            {
+              "type": "card",
+              "title": "两种数数方式别混用",
+              "body": "第 1 行的位置编号是 0。\n\n用 iloc 时只想位置编号：`a:b` 取 a 到 b−1，一共 **b − a** 个。",
+              "flag": {
+                "title": "讲义提醒",
+                "text": "讲义里 iloc[1:4] 写成“Rows 2 to 4”，用的是从 1 数的说法；iloc[1:3, 0:2] 又写成“Rows 1 to 2”，用的是位置编号。两者规则一致，只是数法不同。"
+              }
+            },
+            {
+              "type": "numeric",
+              "prompt": "`df.iloc[2:7]`（假设表足够长）一共取几行？",
+              "answer": 5,
+              "tolerance": 0.001,
+              "unit": "行",
+              "explain": "7 − 2 = 5，取位置 2、3、4、5、6。"
+            },
+            {
+              "type": "match",
+              "prompt": "把取 Amy 的 english 成绩的写法配对。（english 是第 4 列，位置编号 3）",
+              "pairs": [
+                [
+                  "df.loc[1, \"english\"]",
+                  "按标签：行标签 1，列名 english"
+                ],
+                [
+                  "df.iloc[1, 3]",
+                  "按位置：第 1 号行，第 3 号列"
+                ],
+                [
+                  "df.at[1, \"english\"]",
+                  "按标签快速取单个值"
+                ],
+                [
+                  "df.iat[1, 3]",
+                  "按位置快速取单个值"
+                ]
+              ],
+              "explain": "四种写法都得到 88。at/iat 是取单个值时 loc/iloc 的快速版。"
+            }
+          ]
+        },
+        {
+          "title": "按条件筛选",
+          "steps": [
+            {
+              "type": "card",
+              "title": "布尔索引分两步",
+              "body": "`df[df[\"math\"] > 80]` 的过程：\n\n- 先算 `df[\"math\"] > 80`，得到一列 True/False\n- 再只保留 True 的行\n\nNaN 参与比较时结果是 False。"
+            },
+            {
+              "type": "mcq",
+              "prompt": "`df[df[\"math\"] > 80]` 留下谁？",
+              "options": [
+                "Tom 和 Amy",
+                "Tom、Amy 和 Lily",
+                "只有 Amy",
+                "Amy 和 Bob"
+              ],
+              "answer": 0,
+              "why": [
+                "",
+                "Lily 的 NaN 比较结果是 False，被排除。",
+                "Tom 的 85 也大于 80。",
+                "Bob 数学 78，没过 80；95 是他的英语。"
+              ],
+              "explain": "85 和 92 大于 80；78 不够；NaN 一律算 False。"
+            },
+            {
+              "type": "numeric",
+              "prompt": "True 在求和时算 1。`(df[\"math\"] > 80).sum()` 的结果是多少？",
+              "answer": 2,
+              "tolerance": 0.001,
+              "explain": "两个 True（Tom、Amy），加起来是 2。这是数“有几个满足条件”的常用写法。"
+            },
+            {
+              "type": "card",
+              "title": "多个条件：& 和 |",
+              "body": "- 并且：`&`\n- 或者：`|`\n\n每个条件都要加括号。",
+              "equation": "df[(df[\"class\"] == \"A\") & (df[\"math\"] > 80)]"
+            },
+            {
+              "type": "tf",
+              "statement": "两个条件之间可以用 Python 的 `and` 连接，比如 `df[(...) and (...)]`。",
+              "answer": false,
+              "explain": "`and` 只能比较单个真假值，对整列会报 “truth value is ambiguous”。要用 `&`。"
+            },
+            {
+              "type": "mcq",
+              "prompt": "`df[(df[\"class\"] == \"A\") & (df[\"math\"] > 80)]` 留下谁？",
+              "options": [
+                "只有 Tom",
+                "Tom 和 Bob",
+                "Tom 和 Amy",
+                "没有人"
+              ],
+              "answer": 0,
+              "why": [
+                "",
+                "Bob 在 A 班，但数学 78 没过 80。",
+                "Amy 在 B 班。",
+                "Tom 是 A 班，数学 85，两个条件都满足。"
+              ],
+              "explain": "& 要求两个条件同时成立，只有 Tom 符合。"
+            },
+            {
+              "type": "mcq",
+              "prompt": "想选出 class 是 \"A\" 或 \"C\" 的行，最简洁的写法？",
+              "options": [
+                "`df[df[\"class\"].isin([\"A\", \"C\"])]`",
+                "`df[df[\"class\"] in [\"A\", \"C\"]]`",
+                "`df[df[\"class\"] == [\"A\", \"C\"]]`",
+                "`df[\"class\"].has(\"A\", \"C\")`"
+              ],
+              "answer": 0,
+              "why": [
+                "",
+                "Python 的 in 不能对整列逐个判断。",
+                "== 会拿整列和列表比较，不是“属于其中之一”。",
+                "pandas 没有 has 这个方法。"
+              ],
+              "explain": "`isin` 逐个判断每个值是否属于给定列表。"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "清洗与统计",
+      "description": "处理缺失值，算平均数，理解自动对齐。",
+      "lessons": [
+        {
+          "title": "缺失值",
+          "steps": [
+            {
+              "type": "card",
+              "title": "缺失值 NaN",
+              "body": "**缺失值**就是表格里空着的格子，pandas 用 `NaN` 表示。\n\n- `isna()`：标出哪些格子缺失\n- `dropna()`：删掉有缺失的行\n- `fillna(值)`：用指定值填上"
+            },
+            {
+              "type": "numeric",
+              "prompt": "`df[\"math\"].isna().sum()` 的结果是多少？",
+              "answer": 1,
+              "tolerance": 0.001,
+              "explain": "只有 Lily 一个 NaN，True 算 1，所以是 1。"
+            },
+            {
+              "type": "numeric",
+              "prompt": "`len(df.dropna())` 是多少？（原表 4 行）",
+              "answer": 3,
+              "tolerance": 0.001,
+              "unit": "行",
+              "explain": "Lily 那一行有缺失，被整行删除，剩 3 行。"
+            },
+            {
+              "type": "card",
+              "title": "默认不改原表",
+              "body": "`dropna()` 和 `fillna()` 默认**返回一张新表**，原来的 df 不变。\n\n想保留结果，要赋值回去：",
+              "equation": "df = df.fillna({\"math\": 0})"
+            },
+            {
+              "type": "tf",
+              "statement": "只写一行 `df.fillna(0)`，df 里 Lily 的数学就变成 0 了。",
+              "answer": false,
+              "explain": "它只返回新表。没有 `df = ...` 接住，结果就丢了。"
+            },
+            {
+              "type": "mcq",
+              "prompt": "`df[\"math\"].mean()` 的结果是？",
+              "options": [
+                "85.0",
+                "63.75",
+                "NaN",
+                "255.0"
+              ],
+              "answer": 0,
+              "why": [
+                "",
+                "这是把 NaN 当 0 再除以 4 的结果。",
+                "统计方法默认跳过 NaN，不会传染。",
+                "这是总和，不是平均。"
+              ],
+              "explain": "跳过 NaN 后 (85 + 92 + 78) ÷ 3 = 85.0。"
+            },
+            {
+              "type": "order",
+              "prompt": "清洗数学成绩的顺序：先检查，再处理，最后确认。",
+              "items": [
+                "df[\"math\"].isna().sum()",
+                "df = df.fillna({\"math\": 0})",
+                "df[\"math\"].isna().sum()  # 应为 0"
+              ],
+              "explain": "先数有几个缺失，再填补并赋值回去，最后再数一次确认已经清零。"
+            }
+          ]
+        },
+        {
+          "title": "统计、axis 与自动对齐",
+          "steps": [
+            {
+              "type": "card",
+              "title": "mean 和 axis",
+              "body": "- `df[[\"math\", \"english\"]].mean()`：每**列**一个平均\n- 加 `axis=1`：每**行**一个平均\n\n可以记成：axis=0 往下压，axis=1 往右压。"
+            },
+            {
+              "type": "numeric",
+              "prompt": "english 列是 70、88、95、80。`df[\"english\"].mean()` 是多少？",
+              "answer": 83.25,
+              "tolerance": 0.001,
+              "explain": "(70 + 88 + 95 + 80) ÷ 4 = 333 ÷ 4 = 83.25。"
+            },
+            {
+              "type": "mcq",
+              "prompt": "想算每个学生两科的平均分，结果每人一个数，应该用？",
+              "options": [
+                "`df[[\"math\", \"english\"]].mean(axis=1)`",
+                "`df[[\"math\", \"english\"]].mean()`",
+                "`df[[\"math\", \"english\"]].mean(axis=0)`",
+                "`df.mean(\"name\")`"
+              ],
+              "answer": 0,
+              "why": [
+                "",
+                "默认 axis=0，得到的是每科一个平均。",
+                "axis=0 就是默认，每列一个结果。",
+                "mean 不是这样指定分组的。"
+              ],
+              "explain": "每行一个结果 → axis=1。"
+            },
+            {
+              "type": "card",
+              "title": "按标签对齐",
+              "body": "两个 Series 相加时，pandas **按标签配对**，不按位置。\n\n对不上的标签，结果是 NaN。",
+              "equation": "s = a:1  b:2  c:3\nt = b:10 c:20 d:30\ns + t → a:NaN b:12 c:23 d:NaN"
+            },
+            {
+              "type": "tf",
+              "statement": "上面的 s + t 中，结果里 b 的值是 12。",
+              "answer": true,
+              "explain": "s 的 b 是 2，t 的 b 是 10，按标签配对相加得 12。"
+            },
+            {
+              "type": "tf",
+              "statement": "s + t 会按位置相加，所以 a 的结果是 1 + 10 = 11。",
+              "answer": false,
+              "explain": "pandas 按标签配对。t 里没有 a，所以 a 是 NaN。"
+            },
+            {
+              "type": "match",
+              "prompt": "把方法和用途配对。",
+              "pairs": [
+                [
+                  "value_counts()",
+                  "每个值出现几次"
+                ],
+                [
+                  "str.upper()",
+                  "整列文字转大写"
+                ],
+                [
+                  "agg()",
+                  "把一列压缩成一个值"
+                ],
+                [
+                  "transform()",
+                  "逐个变换，形状不变"
+                ]
+              ],
+              "explain": "agg 和 transform 的区别在于结果的形状：压成一个值，还是保持原来的行数。"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "分组、合并与读写",
+      "description": "groupby、merge、pivot_table，以及读写文件时的坑。",
+      "lessons": [
+        {
+          "title": "分组汇总 groupby",
+          "steps": [
+            {
+              "type": "card",
+              "title": "拆分 → 计算 → 合并",
+              "body": "`df.groupby(\"class\")[\"english\"].mean()` 回答“每个班英语平均多少”。\n\n- **拆分**：按 class 分成 A、B 两组\n- **计算**：每组各算平均\n- **合并**：拼成一个结果"
+            },
+            {
+              "type": "order",
+              "prompt": "按 groupby 的执行顺序排列。",
+              "items": [
+                "按 class 把行拆成 A 组和 B 组",
+                "每组分别计算 english 的平均",
+                "把各组结果拼成一个 Series"
+              ],
+              "explain": "split → apply → combine，这三步是 groupby 名字背后的含义。"
+            },
+            {
+              "type": "numeric",
+              "prompt": "A 班是 Tom(70) 和 Bob(95)。`df.groupby(\"class\")[\"english\"].mean()` 里 A 班是多少？",
+              "answer": 82.5,
+              "tolerance": 0.001,
+              "explain": "(70 + 95) ÷ 2 = 82.5。"
+            },
+            {
+              "type": "mcq",
+              "prompt": "B 班数学是 Amy 92、Lily NaN。B 班数学平均是多少？",
+              "options": [
+                "92.0",
+                "46.0",
+                "NaN",
+                "报错"
+              ],
+              "answer": 0,
+              "why": [
+                "",
+                "这是把 NaN 当 0 算的结果。",
+                "分组后的统计同样跳过 NaN。",
+                "缺失值不会让 mean 报错。"
+              ],
+              "explain": "NaN 被跳过，B 班只有 92 一个有效值。"
+            },
+            {
+              "type": "order",
+              "prompt": "拼出“每个班数学最高分”的代码。",
+              "items": [
+                "df",
+                ".groupby(\"class\")",
+                "[\"math\"]",
+                ".max()"
+              ],
+              "explain": "先分组，再选列，最后汇总。结果 A 班 85.0，B 班 92.0。"
+            },
+            {
+              "type": "tf",
+              "statement": "按两列分组，比如 `groupby([\"class\", \"gender\"])`，结果的行标签会变成两层。",
+              "answer": true,
+              "explain": "这种两层的行标签叫 MultiIndex。"
+            }
+          ]
+        },
+        {
+          "title": "合并与透视表",
+          "steps": [
+            {
+              "type": "card",
+              "title": "concat 上下拼，merge 左右配",
+              "body": "- `pd.concat([df1, df2])`：结构相同的表**上下接起来**\n- `pd.merge(a, b, on=\"id\")`：按共同列**左右匹配**，类似 Excel 的 VLOOKUP"
+            },
+            {
+              "type": "mcq",
+              "prompt": "一月、二月的销售表列名完全一样，想接成一张长表，用？",
+              "options": [
+                "`pd.concat([jan, feb])`",
+                "`pd.merge(jan, feb, on=\"id\")`",
+                "`jan.groupby(feb)`",
+                "`jan + feb`"
+              ],
+              "answer": 0,
+              "why": [
+                "",
+                "merge 用来按共同列配对，不是追加行。",
+                "groupby 是分组，不是拼接。",
+                "相加会按标签对齐求和，不会接成长表。"
+              ],
+              "explain": "上下追加行 → concat。"
+            },
+            {
+              "type": "card",
+              "title": "key 重复时行数会变多",
+              "body": "左表有 2 行 key 都是 foo，右表也有 2 行 foo。\n\nmerge 会把每一对都配上，结果是 2 × 2 = 4 行。"
+            },
+            {
+              "type": "numeric",
+              "prompt": "左表 3 行的 key 都是 \"x\"，右表 2 行的 key 也都是 \"x\"。`pd.merge(left, right, on=\"key\")` 有几行？",
+              "answer": 6,
+              "tolerance": 0.001,
+              "unit": "行",
+              "explain": "每个左行都和每个右行配一次：3 × 2 = 6。"
+            },
+            {
+              "type": "card",
+              "title": "透视表 pivot_table",
+              "body": "**透视表**按两个维度汇总，和 Excel 里一样。\n\n格子里默认是**平均值**，没有数据的格子是 NaN。",
+              "equation": "pd.pivot_table(df, values=\"score\",\n               index=\"class\", columns=\"subject\")"
+            },
+            {
+              "type": "mcq",
+              "prompt": "上面这行 pivot_table 得到的表，格子里是什么？",
+              "options": [
+                "该班该科的平均分",
+                "该班该科的总分",
+                "该班该科的人数",
+                "该班该科的最高分"
+              ],
+              "answer": 0,
+              "why": [
+                "",
+                "要总分需写 aggfunc=\"sum\"。",
+                "要人数需写 aggfunc=\"count\"。",
+                "要最高分需写 aggfunc=\"max\"。"
+              ],
+              "explain": "pivot_table 默认 aggfunc 是 mean。行是班级，列是科目。"
+            },
+            {
+              "type": "tf",
+              "statement": "merge 的 key 不唯一时，结果行数永远不会超过两张表行数之和。",
+              "answer": false,
+              "explain": "重复的 key 会两两配对，行数可能是乘积，比如 3 × 2 = 6。"
+            }
+          ]
+        },
+        {
+          "title": "读写文件与常见坑",
+          "steps": [
+            {
+              "type": "card",
+              "title": "读写 CSV",
+              "body": "- 读：`pd.read_csv(\"scores.csv\")`\n- 写：`df.to_csv(\"scores.csv\", index=False)`\n\n写出时不加 `index=False`，行标签也会被写进文件。读回来就多出一列 `Unnamed: 0`。"
+            },
+            {
+              "type": "mcq",
+              "prompt": "读回自己保存的 CSV，多出一列 `Unnamed: 0`，原因是？",
+              "options": [
+                "写出时把行标签 index 也写进去了",
+                "CSV 文件损坏了",
+                "read_csv 默认会加一列编号",
+                "原表里本来就有空列名"
+              ],
+              "answer": 0,
+              "why": [
+                "",
+                "文件没坏，那一列就是原来的 0、1、2…。",
+                "read_csv 不会凭空加列，是文件里真有这一列。",
+                "原表没有空列名，这列来自 index。"
+              ],
+              "explain": "to_csv 默认写出 index。加 `index=False` 即可避免。"
+            },
+            {
+              "type": "card",
+              "title": "常见报错：truth value is ambiguous",
+              "body": "`if df[\"math\"] > 80:` 会报 `ValueError`。\n\n一整列有很多 True/False，pandas 不知道你问“全部为真”还是“有一个为真”。用 `.any()` 或 `.all()` 说清楚。"
+            },
+            {
+              "type": "mcq",
+              "prompt": "想判断“是否**有人**数学超过 90”，正确写法？",
+              "options": [
+                "`if (df[\"math\"] > 90).any():`",
+                "`if df[\"math\"] > 90:`",
+                "`if (df[\"math\"] > 90).all():`",
+                "`if df[\"math\"].max > 90:`"
+              ],
+              "answer": 0,
+              "why": [
+                "",
+                "整列放进 if 会报 truth value is ambiguous。",
+                "all 问的是“是否所有人都超过 90”。",
+                "max 后面少了括号，比较的是方法本身。"
+              ],
+              "explain": "“有一个满足”就用 any()。"
+            },
+            {
+              "type": "card",
+              "title": "pandas 3.0：Copy-on-Write",
+              "body": "3.0 起默认开启 **Copy-on-Write**。链式赋值 `df[\"math\"][0] = 100` 不再修改 df，还会给出警告。\n\n改单个格子请用 loc：",
+              "equation": "df.loc[0, \"math\"] = 100"
+            },
+            {
+              "type": "tf",
+              "statement": "在 pandas 3.0 里，`df[\"math\"][0] = 100` 会把 Tom 的数学改成 100。",
+              "answer": false,
+              "explain": "链式赋值改的是一份副本，df 不变。用 `df.loc[0, \"math\"] = 100`。"
+            },
+            {
+              "type": "tf",
+              "statement": "`df.to_csv(\"scores.csv\", index=False)` 写出的文件，读回来不会有 `Unnamed: 0` 列。",
+              "answer": true,
+              "explain": "index=False 表示不写行标签，读回来就只有原来的列。"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "seaborn 入门",
+      "description": "seaborn 是什么，以及怎样给列分配角色。",
+      "lessons": [
+        {
+          "title": "seaborn 是什么",
+          "steps": [
+            {
+              "type": "card",
+              "title": "画统计图的“翻译官”",
+              "body": "seaborn 用来画**统计图**。它建在 **Matplotlib** 之上。\n\n你交给它一张 DataFrame，说明哪列放哪里。它替你调用 Matplotlib，图例和坐标轴标签也自动加好。"
+            },
+            {
+              "type": "card",
+              "title": "三行常用开头",
+              "body": "- `import seaborn as sns`\n- `import matplotlib.pyplot as plt`\n- `sns.set_theme()`：换上 seaborn 外观\n\n不在 Jupyter 里运行时，最后要 `plt.show()` 才能看到图。"
+            },
+            {
+              "type": "mcq",
+              "prompt": "seaborn 画图时，底层真正负责画的是哪个库？",
+              "options": [
+                "Matplotlib",
+                "NumPy",
+                "SciPy",
+                "pandas"
+              ],
+              "answer": 0,
+              "why": [
+                "",
+                "NumPy 负责数字数组，不画图。",
+                "SciPy 负责统计和科学计算。",
+                "pandas 提供数据，seaborn 读它，但不由它来画。"
+              ],
+              "explain": "seaborn 把你的描述翻译成 Matplotlib 调用。"
+            },
+            {
+              "type": "tf",
+              "statement": "`sns.set_theme()` 只影响 seaborn 画的图，Matplotlib 自己画的图不受影响。",
+              "answer": false,
+              "explain": "它改的是 Matplotlib 的全局设置，所有图都会换外观。"
+            },
+            {
+              "type": "tf",
+              "statement": "用 python 命令直接运行脚本时，需要 `plt.show()` 才会弹出图。",
+              "answer": true,
+              "explain": "Jupyter 会自动显示图，普通脚本不会。"
+            },
+            {
+              "type": "mcq",
+              "prompt": "`sns.load_dataset(\"tips\")` 返回什么？",
+              "options": [
+                "一个 pandas DataFrame",
+                "一张画好的图",
+                "一个 CSV 文件路径",
+                "一个 Python 字典"
+              ],
+              "answer": 0,
+              "why": [
+                "",
+                "它只给数据，画图要另外调用函数。",
+                "它直接返回表格对象，不是路径。",
+                "返回的是表格，可以直接用 df 的方法。"
+              ],
+              "explain": "示例数据就是普通 DataFrame。它需要联网下载，作业里一般改用 `pd.read_csv()`。"
+            }
+          ]
+        },
+        {
+          "title": "给列分配角色",
+          "steps": [
+            {
+              "type": "card",
+              "title": "只说角色，不说颜色",
+              "body": "seaborn 的核心思路：你只说“哪列扮演什么角色”。",
+              "equation": "sns.relplot(data=df, x=\"hours\", y=\"score\",\n            hue=\"class\", style=\"gender\", col=\"class\")"
+            },
+            {
+              "type": "match",
+              "prompt": "把参数和它在图上的效果配对。",
+              "pairs": [
+                [
+                  "hue",
+                  "不同组用不同颜色"
+                ],
+                [
+                  "style",
+                  "不同组用不同点形或线型"
+                ],
+                [
+                  "size",
+                  "点的大小或线的粗细"
+                ],
+                [
+                  "col",
+                  "拆成左右并排的子图"
+                ]
+              ],
+              "explain": "还有 row，作用和 col 一样，只是上下排列子图。"
+            },
+            {
+              "type": "mcq",
+              "prompt": "想把 A 班、B 班画成**左右两张**子图，用哪个参数？",
+              "options": [
+                "`col=\"class\"`",
+                "`hue=\"class\"`",
+                "`style=\"class\"`",
+                "`row=\"class\"`"
+              ],
+              "answer": 0,
+              "why": [
+                "",
+                "hue 在同一张图里用颜色区分。",
+                "style 在同一张图里用点形区分。",
+                "row 是上下排列。"
+              ],
+              "explain": "col 按列拆分子图，横向排开。"
+            },
+            {
+              "type": "tf",
+              "statement": "用 seaborn 时，通常要自己写出每组的颜色，比如 A 班红、B 班蓝。",
+              "answer": false,
+              "explain": "seaborn 根据 hue 那列自动选颜色、生成图例。"
+            },
+            {
+              "type": "mcq",
+              "prompt": "`hue=\"body_mass_g\"`（体重，数值列）时，颜色会怎样？",
+              "options": [
+                "由浅到深的渐变色",
+                "几种区分明显的颜色",
+                "全部同一种颜色",
+                "报错，hue 只能用文字列"
+              ],
+              "answer": 0,
+              "why": [
+                "",
+                "这是 hue 用类别列时的效果。",
+                "hue 会生效，只是换成连续色。",
+                "数值列也可以做 hue。"
+              ],
+              "explain": "seaborn 看数据类型选配色：类别→分明的颜色，数值→渐变。"
+            },
+            {
+              "type": "order",
+              "prompt": "拼出画“学习时长 vs 分数”散点图的代码。",
+              "items": [
+                "sns.relplot(",
+                "data=df,",
+                "x=\"hours\",",
+                "y=\"score\"",
+                ")"
+              ],
+              "explain": "data 指定表，x、y 指定列名。relplot 默认画散点图。"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "选对图",
+      "description": "按问题选函数：关系、分布、类别比较。",
+      "lessons": [
+        {
+          "title": "函数家族",
+          "steps": [
+            {
+              "type": "card",
+              "title": "先问：你想看什么？",
+              "body": "- 两个数值的**关系** → `relplot`\n- 一个变量的**分布** → `displot`\n- 不同**类别**比较 → `catplot`\n- 所有数值列两两一览 → `pairplot`"
+            },
+            {
+              "type": "match",
+              "prompt": "把问题和最合适的函数配对。",
+              "pairs": [
+                [
+                  "学习时长和成绩有关系吗？",
+                  "relplot"
+                ],
+                [
+                  "全班成绩集中在哪个分数段？",
+                  "displot"
+                ],
+                [
+                  "三个科目的平均分谁高？",
+                  "catplot"
+                ],
+                [
+                  "表里所有数值列互相什么关系？",
+                  "pairplot"
+                ]
+              ],
+              "explain": "先想清楚问题类型，函数就选出来了。"
+            },
+            {
+              "type": "card",
+              "title": "kind 切换具体图形",
+              "body": "- relplot：`\"scatter\"`（默认）、`\"line\"`\n- displot：`\"hist\"`（默认）、`\"kde\"`、`\"ecdf\"`\n\n**分布**是指一列值怎么散开：集中在哪，有没有极端值。"
+            },
+            {
+              "type": "mcq",
+              "prompt": "画三个城市一年的气温变化曲线，每城一条线。`kind=` 填什么？",
+              "options": [
+                "`\"line\"`",
+                "`\"scatter\"`",
+                "`\"hist\"`",
+                "`\"bar\"`"
+              ],
+              "answer": 0,
+              "why": [
+                "",
+                "散点看不出随时间连续变化。",
+                "hist 是 displot 的直方图。",
+                "bar 属于 catplot。"
+              ],
+              "explain": "`sns.relplot(..., x=\"date\", y=\"temp\", hue=\"city\", kind=\"line\")`。"
+            },
+            {
+              "type": "tf",
+              "statement": "`sns.displot(data=df, x=\"score\", kde=True)` 会在直方图上叠一条平滑曲线。",
+              "answer": true,
+              "explain": "KDE 可以看作磨平之后的直方图。"
+            },
+            {
+              "type": "mcq",
+              "prompt": "ECDF 曲线在 80 分处的高度是 0.6，意思是？",
+              "options": [
+                "60% 的人不超过 80 分",
+                "60% 的人超过 80 分",
+                "有 0.6 个人考了 80 分",
+                "80 分的人占 6%"
+              ],
+              "answer": 0,
+              "why": [
+                "",
+                "方向反了，ECDF 累计的是“小于等于”。",
+                "纵轴是比例，不是人数。",
+                "0.6 是 60%，而且是累计比例。"
+              ],
+              "explain": "ECDF 从 0 爬到 1，表示“小于等于这个值的人占多少”。"
+            }
+          ]
+        },
+        {
+          "title": "类别图 catplot",
+          "steps": [
+            {
+              "type": "card",
+              "title": "同一份数据，不同详细程度",
+              "body": "- `kind=\"swarm\"`：每人一个点\n- `kind=\"violin\"`：分布的形状\n- `kind=\"box\"`：中位数和四分位范围\n- `kind=\"bar\"`：柱高是**平均值**，竖线是置信区间"
+            },
+            {
+              "type": "match",
+              "prompt": "把 kind 和画出的内容配对。",
+              "pairs": [
+                [
+                  "swarm",
+                  "每个人一个点，自动错开"
+                ],
+                [
+                  "violin",
+                  "越宽代表这个分数段人越多"
+                ],
+                [
+                  "bar",
+                  "平均值 + 误差竖线"
+                ]
+              ],
+              "explain": "从 swarm 到 bar，信息越来越概括。"
+            },
+            {
+              "type": "mcq",
+              "prompt": "`catplot(kind=\"bar\", x=\"subject\", y=\"score\")` 的柱子高度代表？",
+              "options": [
+                "该科平均分",
+                "该科总分",
+                "该科人数",
+                "该科最高分"
+              ],
+              "answer": 0,
+              "why": [
+                "",
+                "seaborn 的 bar 默认算平均，不是总和。",
+                "数人数要用 kind=\"count\"。",
+                "最高分不是默认的统计。"
+              ],
+              "explain": "bar 默认显示 y 的平均值。"
+            },
+            {
+              "type": "card",
+              "title": "置信区间",
+              "body": "我们只有一部分样本，算出的平均数不一定准。\n\n**置信区间**表示真实平均数大概率落在这个范围。范围越宽越不确定。seaborn 用 bootstrap 反复重新抽样来算它。"
+            },
+            {
+              "type": "tf",
+              "statement": "两根柱子的误差竖线大量重叠，说明两组差异不一定可靠。",
+              "answer": true,
+              "explain": "两个平均数的可能范围重叠很多，看到的差距可能只是样本的偶然。"
+            },
+            {
+              "type": "tf",
+              "statement": "柱子上的黑竖线越长，说明这组的平均值估计得越准确。",
+              "answer": false,
+              "explain": "竖线越长，不确定性越大，估计越不准。"
+            },
+            {
+              "type": "mcq",
+              "prompt": "想在 bar 图里按性别分成两种颜色的柱子，加哪个参数？",
+              "options": [
+                "`hue=\"gender\"`",
+                "`col=\"gender\"`",
+                "`kind=\"gender\"`",
+                "`color=\"gender\"`"
+              ],
+              "answer": 0,
+              "why": [
+                "",
+                "col 会拆成两张子图，而不是并排两色。",
+                "kind 指图的种类。",
+                "color 要的是一个颜色，不是列名。"
+              ],
+              "explain": "hue 在同一张图里用颜色区分组。"
+            }
+          ]
+        },
+        {
+          "title": "图级与坐标轴级",
+          "steps": [
+            {
+              "type": "card",
+              "title": "两层函数",
+              "body": "- **图级**：`relplot`、`displot`、`catplot`、`lmplot`。能用 col/row 自动拆子图。\n- **坐标轴级**：`scatterplot`、`histplot`、`barplot`、`regplot`。只画一张图，可放进自己排好的版面。"
+            },
+            {
+              "type": "match",
+              "prompt": "把图级函数和它内部调用的坐标轴级函数配对。",
+              "pairs": [
+                [
+                  "relplot(kind=\"scatter\")",
+                  "scatterplot"
+                ],
+                [
+                  "displot(kind=\"hist\")",
+                  "histplot"
+                ],
+                [
+                  "catplot(kind=\"bar\")",
+                  "barplot"
+                ],
+                [
+                  "lmplot",
+                  "regplot"
+                ]
+              ],
+              "explain": "图级函数负责排版子图，具体每张图交给坐标轴级函数画。"
+            },
+            {
+              "type": "mcq",
+              "prompt": "下面哪个函数可以直接用 `col=` 拆子图？",
+              "options": [
+                "`relplot`",
+                "`scatterplot`",
+                "`regplot`",
+                "`barplot`"
+              ],
+              "answer": 0,
+              "why": [
+                "",
+                "坐标轴级函数只画一张图，没有 col 参数。",
+                "regplot 是坐标轴级；拆子图要用 lmplot。",
+                "barplot 是坐标轴级。"
+              ],
+              "explain": "col/row 是图级函数的能力。"
+            },
+            {
+              "type": "tf",
+              "statement": "`regplot` 是图级函数，可以用 `col=\"class\"` 拆成两张子图。",
+              "answer": false,
+              "explain": "regplot 是坐标轴级。想拆子图要用它的图级版本 lmplot。"
+            },
+            {
+              "type": "tf",
+              "statement": "初学时先用图级函数比较方便，因为换图只需改 kind。",
+              "answer": true,
+              "explain": "relplot、displot、catplot 写法统一，切换成本低。"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "回归图与样式",
+      "description": "regplot、kws 字典、透明度和 fill_between。",
+      "lessons": [
+        {
+          "title": "regplot 与 kws",
+          "steps": [
+            {
+              "type": "card",
+              "title": "regplot 画两样东西",
+              "body": "- **散点**：每人一个点\n- **回归线**：最能代表整体趋势的直线，旁边浅色带是置信区间\n\n回归线回答：“身高每增加一点，体重大致增加多少？”"
+            },
+            {
+              "type": "card",
+              "title": "kws = keyword arguments",
+              "body": "点和线分别由 Matplotlib 的 `scatter()` 和 `plot()` 画。\n\n- `scatter_kws`：只交给散点\n- `line_kws`：只交给回归线\n\n两者都是普通的 Python 字典。",
+              "equation": "sns.regplot(data=df, x=\"height\", y=\"weight\",\n    scatter_kws={\"s\": 10},\n    line_kws={\"color\": \"blue\", \"linewidth\": 0.8})"
+            },
+            {
+              "type": "match",
+              "prompt": "把字典里的键和作用配对。",
+              "pairs": [
+                [
+                  "\"s\"",
+                  "点的大小（面积）"
+                ],
+                [
+                  "\"color\"",
+                  "颜色"
+                ],
+                [
+                  "\"linewidth\"",
+                  "线的粗细"
+                ],
+                [
+                  "\"alpha\"",
+                  "透明度"
+                ]
+              ],
+              "explain": "这些都是 Matplotlib 的参数名，seaborn 原样转交。"
+            },
+            {
+              "type": "tf",
+              "statement": "`line_kws={\"s\": 10}` 可以把散点变小。",
+              "answer": false,
+              "explain": "line_kws 交给画线的函数，线没有 s 参数，会报错。s 要放进 scatter_kws。"
+            },
+            {
+              "type": "card",
+              "title": "alpha 控制透明度",
+              "body": "颜色和透明度是两个独立的设置。\n\n- `alpha=1`：不透明（默认）\n- `alpha=0.5`：半透明\n- `alpha=0`：完全看不见\n\n点重叠多时调低 alpha，密集处颜色更深。"
+            },
+            {
+              "type": "mcq",
+              "prompt": "想要**半透明的绿色**散点，`scatter_kws` 怎么写？",
+              "options": [
+                "`{\"color\": \"green\", \"alpha\": 0.5}`",
+                "`{\"color\": \"green\"}`",
+                "`{\"color\": \"green\", \"alpha\": 5}`",
+                "`{\"green\": 0.5}`"
+              ],
+              "answer": 0,
+              "why": [
+                "",
+                "只有颜色，没有透明度，是实心绿。",
+                "alpha 的范围是 0 到 1。",
+                "键要写参数名 color，颜色名是值。"
+              ],
+              "explain": "color 定颜色，alpha 定透明度，两个都要写。"
+            },
+            {
+              "type": "tf",
+              "statement": "s 控制面积，所以 s 从 10 改成 40，点的直径变成原来的 2 倍。",
+              "answer": true,
+              "explain": "面积变 4 倍，直径只变 √4 = 2 倍。"
+            }
+          ]
+        },
+        {
+          "title": "fill_between 涂阴影",
+          "steps": [
+            {
+              "type": "card",
+              "title": "给两条线之间涂颜色",
+              "body": "`plt.fill_between(x, y1, y2)` 在每个 x 处，从下边界 y1 涂到上边界 y2。\n\n像用荧光笔涂满“最低温到最高温”这一段。",
+              "equation": "plt.fill_between(w[\"day\"], w[\"low\"], w[\"high\"],\n                 color=\"red\", alpha=0.2)"
+            },
+            {
+              "type": "match",
+              "prompt": "把 fill_between 的参数和含义配对。",
+              "pairs": [
+                [
+                  "第 1 个参数",
+                  "横坐标 x"
+                ],
+                [
+                  "第 2 个参数",
+                  "下边界 y1"
+                ],
+                [
+                  "第 3 个参数",
+                  "上边界 y2"
+                ],
+                [
+                  "alpha",
+                  "阴影透明度"
+                ]
+              ],
+              "explain": "x、y1、y2 必须一一对应，长度不同会报 ValueError。"
+            },
+            {
+              "type": "mcq",
+              "prompt": "阴影带通常把 alpha 设在 0.1–0.3，主要原因是？",
+              "options": [
+                "阴影是背景信息，不能盖住主线",
+                "alpha 只能取这个范围",
+                "颜色越淡计算越快",
+                "alpha 高于 0.3 会报错"
+              ],
+              "answer": 0,
+              "why": [
+                "",
+                "alpha 可以取 0 到 1 之间任意值。",
+                "透明度不影响计算速度。",
+                "alpha=1 也能画，只是会盖住线和网格。"
+              ],
+              "explain": "太实的阴影会抢走主线的注意力。"
+            },
+            {
+              "type": "card",
+              "title": "置信区间阴影也是它",
+              "body": "置信区间阴影的两条边界是**下限**和**上限**。\n\n自己算出上下限后，用 fill_between 画，就能随意控制颜色和透明度。",
+              "flag": {
+                "title": "讲义补充",
+                "text": "讲义说 fill_between 可以“自定义置信区间阴影的颜色和透明度”。准确地说，它是另画一条新的阴影带，不是修改 regplot 自带的那条。"
+              }
+            },
+            {
+              "type": "order",
+              "prompt": "画“平均分折线 + 置信区间阴影”的代码，按顺序排好。",
+              "items": [
+                "plt.fill_between(df[\"week\"], df[\"lower\"], df[\"upper\"], alpha=0.2)",
+                "plt.plot(df[\"week\"], df[\"mean\"])",
+                "plt.show()"
+              ],
+              "explain": "先画阴影，再画折线，线会在阴影上面。最后显示。"
+            },
+            {
+              "type": "tf",
+              "statement": "fill_between 的 y1 和 y2 写反了，程序一定会报错。",
+              "answer": false,
+              "explain": "它只是涂满两条线之间的区域，写反也能画。习惯上先写下边界，方便阅读。"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "回归的数字",
+      "description": "scipy.stats.linregress、解包，以及交作业前的收尾。",
+      "lessons": [
+        {
+          "title": "scipy 线性回归",
+          "steps": [
+            {
+              "type": "card",
+              "title": "图给样子，scipy 给数字",
+              "body": "`regplot` 只负责画线，不告诉你斜率多少。\n\n`from scipy import stats` 后，`stats.linregress(x, y)` 算出回归线的具体数字。"
+            },
+            {
+              "type": "card",
+              "title": "按顺序解包 5 个结果",
+              "body": "linregress 按**固定顺序**返回 5 个值。左边写 5 个变量，就一一对应。这叫**解包**。\n\n顺序由函数规定，和变量名无关。",
+              "equation": "slope, intercept, r_value, p_value, std_err = stats.linregress(x, y)"
+            },
+            {
+              "type": "mcq",
+              "prompt": "写成 `a, b, c, d, e = stats.linregress(x, y)`，`c` 里是什么？",
+              "options": [
+                "r 值（相关系数）",
+                "slope（斜率）",
+                "p 值（显著性）",
+                "intercept（截距）"
+              ],
+              "answer": 0,
+              "why": [
+                "",
+                "斜率是第 1 个，在 a 里。",
+                "p 值是第 4 个，在 d 里。",
+                "截距是第 2 个，在 b 里。"
+              ],
+              "explain": "解包只看位置：斜率、截距、r、p、标准误。"
+            },
+            {
+              "type": "mcq",
+              "prompt": "`s, i, r = stats.linregress(x, y)` 运行会怎样？",
+              "options": [
+                "报错 ValueError：值的个数对不上",
+                "s、i、r 依次拿到前三个值",
+                "r 自动收下剩余的三个值",
+                "多出的两个值被默默忽略"
+              ],
+              "answer": 0,
+              "why": [
+                "",
+                "Python 不会默默丢弃多余的值。",
+                "要收集剩余值需写 *rest，这里没写。",
+                "个数对不上就报 ValueError。"
+              ],
+              "explain": "左边 3 个变量，右边 5 个值，会报 too many values to unpack。"
+            },
+            {
+              "type": "card",
+              "title": "5 个数字的意思",
+              "body": "- **slope 斜率**：x 每增加 1，y 平均增加多少\n- **intercept 截距**：直线和 y 轴的交点\n- **r**：一起变化的程度，-1 到 1\n- **p 值**：越小越说明不是巧合，常以 0.05 为界\n- **std_err**：斜率估计有多不准",
+              "equation": "体重 ≈ 截距 + 斜率 × 身高"
+            },
+            {
+              "type": "numeric",
+              "prompt": "某次回归得到截距 -96.2，斜率 0.94。预测身高 168 cm 的人体重是多少？",
+              "answer": 61.72,
+              "tolerance": 0.01,
+              "unit": "kg",
+              "explain": "-96.2 + 0.94 × 168 = 61.72 kg。"
+            },
+            {
+              "type": "tf",
+              "statement": "斜率 2.5、p 值 0.4，可以说“x 每加 1，y 加 2.5，而且这个关系很可靠”。",
+              "answer": false,
+              "explain": "p = 0.4 远大于 0.05，这个趋势很可能只是巧合。"
+            },
+            {
+              "type": "numeric",
+              "prompt": "R² 等于 r 的平方。r = 0.9 时，R² 是多少？",
+              "answer": 0.81,
+              "tolerance": 0.01,
+              "explain": "0.9² = 0.81，即 y 的差异中约 81% 可以用 x 解释。"
+            }
+          ]
+        },
+        {
+          "title": "交作业前的收尾",
+          "steps": [
+            {
+              "type": "card",
+              "title": "改标签、存文件",
+              "body": "默认标签是列名，比如 `study_hours`。报告里最好改成中文说明。\n\n- 坐标轴级函数（如 regplot）：`plt.xlabel(...)`\n- 图级函数返回 g：`g.set_axis_labels(...)`\n- 保存：`plt.savefig(\"fig.png\")`"
+            },
+            {
+              "type": "mcq",
+              "prompt": "`g = sns.relplot(...)` 之后，想改两个坐标轴标题，最直接的是？",
+              "options": [
+                "`g.set_axis_labels(\"学习时长\", \"分数\")`",
+                "`g.title(\"学习时长\")`",
+                "`sns.xlabel(\"学习时长\")`",
+                "`g.rename(x=\"学习时长\")`"
+              ],
+              "answer": 0,
+              "why": [
+                "",
+                "title 设置的是标题，不是坐标轴。",
+                "seaborn 没有 sns.xlabel。",
+                "rename 是 pandas 改列名的方法。"
+              ],
+              "explain": "图级函数返回的网格对象有 set_axis_labels。"
+            },
+            {
+              "type": "card",
+              "title": "seaborn 喜欢长表",
+              "body": "- **宽表**：math、english 各占一列\n- **长表**：每行一条记录，科目放进 subject 一列\n\n想写 `hue=\"subject\"`，先用 pandas 的 `melt()` 把宽表变长表。",
+              "equation": "df.melt(id_vars=\"name\", var_name=\"subject\",\n        value_name=\"score\")"
+            },
+            {
+              "type": "numeric",
+              "prompt": "宽表有 2 个学生，每人有 math、english 两列成绩。melt 成长表后有几行？",
+              "answer": 4,
+              "tolerance": 0.001,
+              "unit": "行",
+              "explain": "每个学生 × 每门科目一行：2 × 2 = 4。"
+            },
+            {
+              "type": "tf",
+              "statement": "宽表可以直接写 `hue=\"subject\"`，seaborn 会自动认出 math 和 english 是两个科目。",
+              "answer": false,
+              "explain": "宽表里没有 subject 这一列。先 melt 成长表才行。"
+            },
+            {
+              "type": "order",
+              "prompt": "按一次完整分析的顺序排列。",
+              "items": [
+                "pd.read_csv 读数据",
+                "isna / fillna 清洗",
+                "groupby / linregress 分析",
+                "sns 画图并 savefig"
+              ],
+              "explain": "读数据 → 清洗 → 分析 → 可视化，这是作业里最常见的流程。"
+            },
+            {
+              "type": "mcq",
+              "prompt": "讲义第一版 `get_regression()` 没写 return。`test = get_regression(...)` 之后 test 是什么？",
+              "options": [
+                "`None`",
+                "画好的图",
+                "回归的斜率",
+                "读进来的 df"
+              ],
+              "answer": 0,
+              "why": [
+                "",
+                "图会显示出来，但函数没有把它返回。",
+                "那版没算斜率，也没返回。",
+                "df 是函数内部的变量，没有返回出去。"
+              ],
+              "explain": "Python 函数没有 return 时，默认返回 None。"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

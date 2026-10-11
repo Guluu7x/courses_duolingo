@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>__SITE_TITLE__</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="__SITE_TITLE__">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#131f24" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<style>
+:root{
+  --bg:#ffffff; --ink:#3c3c3c; --muted:#777; --line:#e5e5e5; --soft:#f7f7f7; --card:#ffffff;
+  --green:#58cc02; --green-d:#58a700; --red:#ff4b4b; --red-d:#ea2b2b; --blue:#1cb0f6; --blue-d:#1899d6;
+  --gold:#ffc800; --gold-d:#e5a500; --ok-bg:#d7ffb8; --ok-ink:#58a700; --bad-bg:#ffdfe0; --bad-ink:#ea2b2b;
+  --flag-bg:#fff5d6; --flag-line:#f0b400; --eq-bg:#eef7ff; --eq-line:#84d8ff; --sel-bg:#ddf4ff;
+  --shadow:0 8px 30px rgba(0,0,0,.18);
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#131f24; --ink:#f1f7fb; --muted:#9fb0ba; --line:#37464f; --soft:#1b2a31; --card:#18262c;
+    --ok-bg:#1d3a10; --ok-ink:#79d634; --bad-bg:#3d1c1e; --bad-ink:#ff7b7b;
+    --flag-bg:#3a3115; --flag-line:#c89a10; --eq-bg:#132f3f; --eq-line:#1f6f99; --sel-bg:#16384a;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#131f24; --ink:#f1f7fb; --muted:#9fb0ba; --line:#37464f; --soft:#1b2a31; --card:#18262c;
+  --ok-bg:#1d3a10; --ok-ink:#79d634; --bad-bg:#3d1c1e; --bad-ink:#ff7b7b;
+  --flag-bg:#3a3115; --flag-line:#c89a10; --eq-bg:#132f3f; --eq-line:#1f6f99; --sel-bg:#16384a;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink)}
+body{font:16px/1.5 "Nunito","Segoe UI",system-ui,-apple-system,Roboto,sans-serif;-webkit-tap-highlight-color:transparent;min-height:100vh}
+button{font:inherit;color:inherit;cursor:pointer}
+button:disabled{cursor:default}
+.wrap{max-width:640px;margin:0 auto;padding-inline:16px}
+[hidden]{display:none!important}
+
+/* ---------- buttons ---------- */
+.btn{border:0;border-radius:14px;padding:13px 20px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;font-size:15px;
+  background:var(--green);color:#fff;box-shadow:0 4px 0 var(--green-d);transition:transform .05s,filter .1s;min-height:48px}
+.btn:active:not(:disabled){transform:translateY(3px);box-shadow:0 1px 0 var(--green-d)}
+.btn:disabled{background:var(--line);color:var(--muted);box-shadow:0 4px 0 var(--line)}
+.btn.blue{background:var(--blue);box-shadow:0 4px 0 var(--blue-d)}
+.btn.red{background:var(--red);box-shadow:0 4px 0 var(--red-d)}
+.btn.ghost{background:var(--card);color:var(--blue);box-shadow:0 4px 0 var(--line);border:2px solid var(--line)}
+.btn.wide{width:100%}
+.link{background:none;border:0;color:var(--blue);font-weight:800;text-transform:uppercase;font-size:13px;letter-spacing:.05em;padding:8px}
+
+/* ---------- top bars ---------- */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:2px solid var(--line)}
+.top .wrap{display:flex;align-items:center;gap:12px;min-height:60px}
+.top h1{font-size:17px;margin:0;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chip{display:inline-flex;align-items:center;gap:4px;font-weight:800;font-size:15px;white-space:nowrap}
+.chip.xp{color:var(--gold-d)} .chip.hearts{color:var(--red)} .chip.combo{color:#ff9600}
+.iconbtn{background:none;border:0;font-size:22px;line-height:1;padding:8px;color:var(--muted);border-radius:10px}
+.iconbtn:hover{background:var(--soft)}
+.tutorbtn{border:2px solid var(--line);background:var(--card);border-radius:12px;padding:6px 10px;font-weight:800;font-size:14px;box-shadow:0 3px 0 var(--line)}
+.progress{flex:1;height:16px;background:var(--line);border-radius:99px;overflow:hidden}
+.progress>i{display:block;height:100%;background:var(--green);border-radius:99px;transition:width .35s;box-shadow:inset 0 -5px 0 rgba(0,0,0,.08)}
+
+/* ---------- course switcher ---------- */
+.switcher{flex:1;min-width:0;display:flex;align-items:center;gap:8px;background:none;border:0;border-radius:12px;padding:6px 8px;margin-left:-8px;font-weight:800;font-size:17px;text-align:left}
+.switcher:hover{background:var(--soft)}
+.switcher .sw-icon{font-size:22px;line-height:1}
+.switcher .sw-name{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.switcher .sw-caret{color:var(--muted);font-size:13px}
+#picker-scrim{position:fixed;inset:0;z-index:7;background:rgba(0,0,0,.2)}
+.picker{position:fixed;z-index:8;left:50%;transform:translateX(-50%);top:calc(64px + env(safe-area-inset-top,0px));width:min(608px,calc(100% - 32px));max-height:calc(100% - 96px);overflow-y:auto;background:var(--card);border:2px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:10px}
+.picker h2{margin:4px 8px 8px;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.pick{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:none;border:2px solid transparent;border-radius:14px;padding:10px}
+.pick:hover{background:var(--soft)}
+.pick.on{border-color:var(--blue);background:var(--sel-bg)}
+.pick .pi{font-size:30px;line-height:1;flex:none;width:40px;text-align:center}
+.pick .pt{flex:1;min-width:0}
+.pick .pt b{display:block;font-size:16px}
+.pick .pt small{display:block;color:var(--muted);font-size:13px;line-height:1.35}
+.pick .meter{height:8px;background:var(--line);border-radius:99px;overflow:hidden;margin-top:6px}
+.pick .meter i{display:block;height:100%;background:var(--green);border-radius:99px}
+.picker .more{margin:8px;padding-top:10px;border-top:2px solid var(--line);color:var(--muted);font-size:13px}
+
+/* ---------- home ---------- */
+.banner{margin:18px 0 0;border:2px solid var(--line);border-radius:16px;padding:14px 16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;background:var(--card)}
+.banner .txt{flex:1;min-width:180px}
+.banner b{display:block}
+.banner small{color:var(--muted)}
+.banner.resume{border-color:var(--blue);background:var(--sel-bg)}
+.unit{margin:26px 0 8px;border-radius:16px;padding:16px 18px;color:#fff;background:var(--c);box-shadow:0 4px 0 var(--cd)}
+.unit small{opacity:.9;font-weight:800;text-transform:uppercase;letter-spacing:.06em;font-size:12px}
+.unit h2{margin:2px 0 2px;font-size:20px}
+.unit p{margin:0;opacity:.95;font-size:14px}
+.path{display:flex;flex-direction:column;align-items:center;gap:14px;padding:18px 0 6px}
+.node{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px}
+.node button{width:72px;height:68px;border-radius:50%;border:0;font-size:28px;font-weight:900;color:#fff;background:var(--c);box-shadow:0 7px 0 var(--cd)}
+.node button:active{transform:translateY(4px);box-shadow:0 3px 0 var(--cd)}
+.node.done button{background:var(--gold);box-shadow:0 7px 0 var(--gold-d)}
+.node.locked button{background:var(--line);box-shadow:0 7px 0 #c9c9c9;color:var(--muted)}
+.node .lbl{font-size:13px;font-weight:700;color:var(--muted);max-width:180px;text-align:center;line-height:1.25}
+.node.current .lbl{color:var(--ink)}
+.node .start{position:absolute;top:-34px;background:var(--card);border:2px solid var(--line);color:var(--c);font-weight:900;font-size:13px;padding:3px 10px;border-radius:10px;animation:bob 1.4s ease-in-out infinite;white-space:nowrap}
+@keyframes bob{50%{transform:translateY(-5px)}}
+.foot{margin:34px 0 40px;text-align:center;color:var(--muted);font-size:13px}
+.reset{background:none;border:2px solid var(--line);border-radius:12px;padding:8px 14px;color:var(--muted);font-weight:800;font-size:13px;text-transform:uppercase;letter-spacing:.04em}
+.reset.armed{border-color:var(--red);color:#fff;background:var(--red)}
+
+/* ---------- lesson ---------- */
+.stage{padding-top:22px;padding-bottom:calc(190px + env(safe-area-inset-bottom,0px))}
+.kind{font-size:13px;font-weight:900;text-transform:uppercase;letter-spacing:.07em;color:var(--blue);margin-bottom:6px}
+.prompt{font-size:21px;font-weight:800;line-height:1.35;margin:0 0 18px}
+.lcard{border:2px solid var(--line);border-radius:18px;padding:18px 18px 8px;background:var(--card)}
+.lcard h2{margin:0 0 8px;font-size:22px}
+.lcard p{margin:0 0 12px}
+.lcard ul{margin:0 0 12px;padding-left:22px}
+code{background:var(--soft);border-radius:6px;padding:1px 5px;font-size:.92em}
+.eq{margin:4px 0 14px;padding:14px 16px;background:var(--eq-bg);border:2px solid var(--eq-line);border-radius:14px;font:600 18px/1.4 ui-monospace,"SF Mono",Menlo,Consolas,monospace;overflow-x:auto;text-align:center;white-space:pre-wrap}
+.flag{margin:4px 0 14px;padding:12px 14px;background:var(--flag-bg);border-left:6px solid var(--flag-line);border-radius:12px;font-size:15px}
+.flag b{display:block;font-size:12px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px}
+.flag p{margin:0}
+.choices{display:grid;gap:10px}
+.choice,.tile{display:flex;align-items:center;gap:12px;text-align:left;width:100%;border:2px solid var(--line);border-radius:14px;background:var(--card);padding:12px 14px;
+  box-shadow:0 3px 0 var(--line);font-size:16px;min-height:52px;transition:background .1s,border-color .1s}
+.choice:hover:not(:disabled),.tile:hover:not(:disabled){background:var(--soft)}
+.kbd{flex:none;display:inline-grid;place-items:center;width:26px;height:26px;border:2px solid var(--line);border-radius:8px;font-size:13px;font-weight:800;color:var(--muted)}
+.sel{border-color:var(--blue)!important;background:var(--sel-bg)!important;box-shadow:0 3px 0 var(--blue)!important}
+.sel .kbd{border-color:var(--blue);color:var(--blue)}
+.right{border-color:var(--green)!important;background:var(--ok-bg)!important;box-shadow:0 3px 0 var(--green)!important}
+.wrong{border-color:var(--red)!important;background:var(--bad-bg)!important;box-shadow:0 3px 0 var(--red)!important}
+.tf{grid-template-columns:1fr 1fr}
+.tf .choice{justify-content:center;font-weight:800;font-size:18px;min-height:64px}
+.statement{border:2px solid var(--line);border-radius:16px;padding:16px;font-size:19px;font-weight:700;margin-bottom:18px;background:var(--soft)}
+.match{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.match .col{display:grid;gap:10px;align-content:start}
+.tile{font-size:15px}
+.tile.done{opacity:.35;box-shadow:none}
+.tile.shake{animation:shake .35s;border-color:var(--red);background:var(--bad-bg)}
+@keyframes shake{20%,60%{transform:translateX(-5px)}40%,80%{transform:translateX(5px)}}
+.seq{min-height:72px;border:2px dashed var(--line);border-radius:16px;padding:10px;display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+.seq .ph{color:var(--muted);margin:auto;font-size:14px}
+.seq .tile .pos{flex:none;font-weight:900;color:var(--blue);min-width:20px}
+.bank{display:grid;gap:8px}
+.bank .tile.used{opacity:.3}
+.num{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.num input{flex:1;min-width:0;font-family:inherit;font-weight:700;font-size:22px;line-height:1.2;padding:14px 16px;border:2px solid var(--line);border-radius:14px;background:var(--soft);color:var(--ink);outline:none}
+.num input:focus{border-color:var(--blue)}
+.num .unit{font-weight:800;font-size:18px;color:var(--muted)}
+.hint{color:var(--muted);font-size:13px;margin-top:10px}
+
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:6;border-top:2px solid var(--line);background:var(--bg);padding:16px 0 calc(16px + env(safe-area-inset-bottom,0px))}
+.bar .wrap{display:flex;flex-direction:column;gap:12px}
+.bar.ok{background:var(--ok-bg);border-color:transparent}
+.bar.bad{background:var(--bad-bg);border-color:transparent}
+.fb h3{margin:0;font-size:22px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.bar.ok .fb h3{color:var(--ok-ink)} .bar.bad .fb h3{color:var(--bad-ink)}
+.fb .xp{font-size:15px;color:var(--gold-d)}
+.fb p{margin:4px 0 0;font-size:15px;max-height:28vh;overflow:auto}
+.fb .ans{font-weight:800}
+.row{display:flex;gap:10px;align-items:center}
+.row .btn{flex:1}
+
+/* ---------- end screens ---------- */
+.center{text-align:center;padding:48px 0 120px}
+.big{font-size:64px;line-height:1}
+.center h2{font-size:28px;margin:14px 0 6px}
+.tiles{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:24px 0}
+.stat{border:2px solid var(--c,var(--gold));border-radius:14px;min-width:110px;overflow:hidden}
+.stat small{display:block;background:var(--c,var(--gold));color:#fff;font-weight:900;font-size:12px;text-transform:uppercase;padding:4px 8px;letter-spacing:.05em}
+.stat b{display:block;font-size:22px;padding:8px}
+
+/* ---------- tutor ---------- */
+#tutor{position:fixed;top:0;right:0;bottom:0;width:min(420px,100%);z-index:20;background:var(--bg);border-left:2px solid var(--line);
+  box-shadow:var(--shadow);display:flex;flex-direction:column;transform:translateX(105%);transition:transform .22s;padding-top:env(safe-area-inset-top,0px)}
+#tutor.open{transform:none}
+#tutor header{display:flex;align-items:center;gap:8px;padding:12px 14px;border-bottom:2px solid var(--line)}
+#tutor header h2{margin:0;font-size:18px;flex:1}
+.working{margin:12px 14px 0;padding:10px 12px;border-radius:12px;background:var(--soft);border:2px solid var(--line);font-size:14px}
+.working small{display:block;text-transform:uppercase;font-weight:900;letter-spacing:.06em;font-size:11px;color:var(--muted)}
+.working .phase{display:inline-block;margin-top:4px;font-size:11px;font-weight:900;text-transform:uppercase;padding:2px 8px;border-radius:99px;background:var(--line)}
+.phase.unanswered{background:var(--sel-bg);color:var(--blue)} .phase.correct{background:var(--ok-bg);color:var(--ok-ink)} .phase.wrong{background:var(--bad-bg);color:var(--bad-ink)}
+.msgs{flex:1;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column;gap:10px}
+.msg{max-width:88%;padding:10px 12px;border-radius:14px;font-size:15px}
+.msg p{margin:0 0 6px} .msg p:last-child{margin:0} .msg ul{margin:4px 0;padding-left:18px}
+.msg.user{align-self:flex-end;background:var(--blue);color:#fff;border-bottom-right-radius:4px}
+.msg.bot{align-self:flex-start;background:var(--soft);border:2px solid var(--line);border-bottom-left-radius:4px}
+.msg.err{align-self:stretch;max-width:none;background:var(--bad-bg);color:var(--bad-ink);font-size:14px}
+.msg.sys{align-self:center;color:var(--muted);font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;padding:2px}
+.dots::after{content:"…";animation:blink 1s infinite}
+@keyframes blink{50%{opacity:.2}}
+.chips{display:flex;gap:8px;flex-wrap:wrap;padding:8px 14px 0}
+.chips button{border:2px solid var(--line);background:var(--card);border-radius:99px;padding:6px 12px;font-size:13px;font-weight:700}
+.chips button:hover{border-color:var(--blue);color:var(--blue)}
+#tutor form{display:flex;gap:8px;padding:10px 14px}
+#tutor textarea{flex:1;resize:none;height:46px;border:2px solid var(--line);border-radius:12px;padding:10px;font:inherit;font-size:15px;background:var(--soft);color:var(--ink)}
+#tutor form .btn{padding:0 14px;min-height:46px}
+#tutor details{padding:0 14px calc(10px + env(safe-area-inset-bottom,0px));font-size:12px;color:var(--muted)}
+#tutor details input{width:100%;margin-top:6px;padding:8px;border:2px solid var(--line);border-radius:10px;background:var(--soft);color:var(--ink);font:inherit}
+#scrim{position:fixed;inset:0;background:rgba(0,0,0,.25);z-index:19}
+
+.toast{position:fixed;left:50%;top:calc(76px + env(safe-area-inset-top,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-weight:700;font-size:14px;z-index:30;box-shadow:var(--shadow)}
+@media (max-width:480px){
+  .prompt{font-size:19px}
+  .match .tile{font-size:14px;padding:10px}
+  .tutorbtn span{display:none}
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<div id="scrim" hidden></div>
+<aside id="tutor" aria-label="AI 助教" aria-hidden="true">
+  <header><span style="font-size:24px">🦉</span><h2>AI 助教</h2><button class="iconbtn" id="tutor-close" aria-label="关闭助教">✕</button></header>
+  <div class="working"><small>当前内容：</small><div id="tutor-item"></div><span class="phase" id="tutor-phase"></span></div>
+  <div class="msgs" id="tutor-msgs"></div>
+  <div class="chips" id="tutor-chips"></div>
+  <form id="tutor-form"><textarea id="tutor-input" placeholder="问点什么…" aria-label="向助教提问"></textarea><button class="btn blue" type="submit">发送</button></form>
+  <details><summary>助教需要 Anthropic API key（可选）</summary>
+    AI 助教需要你自己的 Anthropic API key。key 只保存在这台设备的浏览器里，只会发送到 api.anthropic.com。不填也不影响闯关。
+    <input id="tutor-key" type="password" placeholder="sk-ant-…" autocomplete="off">
+  </details>
+</aside>
+
+<script id="course-data" type="application/json">__COURSES_JSON__</script>
+<script>
+(function () {
+'use strict';
+
+/* ================= helpers ================= */
+const $ = (s, r = document) => r.querySelector(s);
+function h(tag, attrs, ...kids) {
+  const el = document.createElement(tag);
+  if (attrs) for (const [k, v] of Object.entries(attrs)) {
+    if (v == null || v === false) continue;
+    if (k === 'class') el.className = v;
+    else if (k === 'html') el.innerHTML = v;
+    else if (k === 'style') el.style.cssText = v;
+    else if (k.startsWith('on')) el.addEventListener(k.slice(2), v);
+    else el.setAttribute(k, v === true ? '' : v);
+  }
+  for (const k of kids.flat()) { if (k == null || k === false) continue; el.append(k.nodeType ? k : String(k)); }
+  return el;
+}
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+function inline(s) {
+  return esc(s == null ? '' : s)
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+    .replace(/(^|[^*\w])\*([^*\s][^*]*?)\*(?!\w)/g, '$1<em>$2</em>');
+}
+function md(src) {
+  const out = []; let para = [], list = null;
+  const endPara = () => { if (para.length) { out.push('<p>' + inline(para.join(' ')) + '</p>'); para = []; } };
+  const endList = () => { if (list) { out.push('<ul>' + list.map(i => '<li>' + inline(i) + '</li>').join('') + '</ul>'); list = null; } };
+  for (const raw of String(src || '').split('\n')) {
+    const line = raw.trim();
+    if (!line) { endPara(); endList(); continue; }
+    const m = line.match(/^[-*•]\s+(.*)/);
+    if (m) { endPara(); (list || (list = [])).push(m[1]); }
+    else { endList(); para.push(line); }
+  }
+  endPara(); endList();
+  return out.join('');
+}
+const plain = s => String(s || '').replace(/[*`]/g, '');
+function shuffle(a) { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+const range = n => Array.from({ length: n }, (_, i) => i);
+function fmtNum(x) {
+  if (!isFinite(x)) return String(x);
+  const a = Math.abs(x);
+  if (a !== 0 && (a >= 1e9 || a < 1e-4)) return x.toExponential(4).replace(/\.?0+e/, 'e');
+  return Number(x.toPrecision(7)).toLocaleString('en-US', { maximumFractionDigits: 6 });
+}
+function toast(msg) {
+  const t = h('div', { class: 'toast', role: 'status' }, msg);
+  document.body.append(t); setTimeout(() => t.remove(), 2200);
+}
+
+/* ================= course ================= */
+let COURSES = [];
+try { COURSES = JSON.parse($('#course-data').textContent); } catch (e) { COURSES = []; }
+const LAST_KEY = 'duolingo:lastCourse';
+function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* storage blocked */ } }
+const wantedId = decodeURIComponent((location.hash || '').slice(1)) || lsGet(LAST_KEY);
+let COURSE = COURSES.find(c => c.id === wantedId) || COURSES[0] || null;
+if (COURSE) lsSet(LAST_KEY, COURSE.id);
+function switchCourse(id) {
+  if (COURSE && id === COURSE.id) return closePicker();
+  lsSet(LAST_KEY, id);
+  saveChain.then(() => { location.hash = id; location.reload(); });
+}
+window.addEventListener('hashchange', () => {
+  const id = decodeURIComponent(location.hash.slice(1));
+  if (id && COURSE && id !== COURSE.id && COURSES.some(c => c.id === id)) { lsSet(LAST_KEY, id); location.reload(); }
+});
+if (!COURSE || !Array.isArray(COURSE.units)) {
+  $('#app').innerHTML = '<div class="wrap center"><div class="big">🦉</div><h2>还没有课程</h2><p>运行 <code>python3 build_site.py</code> 生成网站。</p></div>';
+  return;
+}
+const UNIT_COLORS = [['#58cc02', '#58a700'], ['#1cb0f6', '#1899d6'], ['#ce82ff', '#a568cc'], ['#ff9600', '#cd7900'], ['#ff4b4b', '#ea2b2b'], ['#00cd9c', '#00a47d'], ['#ff86d0', '#d966ad'], ['#2b70c9', '#1f5aa6']];
+const EX_TYPES = ['mcq', 'tf', 'match', 'order', 'numeric'];
+const TYPE_LABEL = { card: '知识卡', mcq: '单选题', tf: '判断题', match: '配对题', order: '排序题', numeric: '填数字' };
+const isEx = s => EX_TYPES.includes(s.type);
+const LESSONS = [], STEPS = new Map();
+COURSE.units.forEach((u, ui) => {
+  u._color = UNIT_COLORS[ui % UNIT_COLORS.length];
+  (u.lessons || []).forEach((l, li) => {
+    const L = { u, l, ui, li, idx: LESSONS.length };
+    LESSONS.push(L);
+    (l.steps || []).forEach((s, si) => STEPS.set(l.id + ':' + si, { s, L, si }));
+  });
+});
+const lessonById = id => LESSONS.find(x => x.l.id === id);
+document.title = (COURSE.short || COURSE.title) + ' · __SITE_TITLE__';
+
+/* ================= storage ================= */
+const KEY = 'duolingo:' + (COURSE.id || 'course');
+const KEY_API = 'duolingo:apikey';
+const fresh = () => ({ v: 1, xp: 0, completed: {}, review: [], session: null, stats: { answered: 0, correct: 0 } });
+let S = fresh();
+let storeMode = 'memory';
+const hasArtifactStore = () => !!(window.storage && typeof window.storage.get === 'function' && typeof window.storage.set === 'function');
+async function loadState() {
+  if (hasArtifactStore()) {
+    try {
+      const r = await window.storage.get(KEY);
+      storeMode = 'artifact';
+      if (r && r.value) return JSON.parse(r.value);
+    } catch (e) { /* missing key throws; fall through */ if (storeMode !== 'artifact') storeMode = 'artifact'; }
+  }
+  try {
+    const v = localStorage.getItem(KEY);
+    if (storeMode !== 'artifact') storeMode = 'local';
+    if (v) return JSON.parse(v);
+  } catch (e) { /* storage blocked */ }
+  return null;
+}
+let saveChain = Promise.resolve();
+function save() {
+  const snap = JSON.stringify(S);
+  saveChain = saveChain.then(async () => {
+    if (hasArtifactStore()) { try { await window.storage.set(KEY, snap); storeMode = 'artifact'; } catch (e) { /* ignore */ } }
+    try { localStorage.setItem(KEY, snap); if (storeMode === 'memory') storeMode = 'local'; } catch (e) { /* ignore */ }
+  });
+  return saveChain;
+}
+async function clearState() {
+  if (hasArtifactStore() && typeof window.storage.delete === 'function') { try { await window.storage.delete(KEY); } catch (e) {} }
+  try { localStorage.removeItem(KEY); } catch (e) {}
+}
+function sanitize(st) {
+  const s = Object.assign(fresh(), st || {});
+  s.completed = s.completed || {}; s.stats = s.stats || { answered: 0, correct: 0 };
+  s.review = (s.review || []).filter(k => STEPS.has(k));
+  if (s.session && (!Array.isArray(s.session.queue) || !s.session.queue.length)) s.session = null;
+  return s;
+}
+function addReview(k) { if (!S.review.includes(k)) S.review.push(k); }
+function removeReview(k) { S.review = S.review.filter(x => x !== k); }
+
+/* ================= screens ================= */
+const app = $('#app');
+let cur = null;          // current step context in a lesson
+let primary = null;      // button triggered by Enter
+function setPrimary(b) { primary = b; }
+
+function topBar(...kids) { return h('div', { class: 'top' }, h('div', { class: 'wrap' }, ...kids)); }
+function tutorButton() { return h('button', { class: 'tutorbtn', onclick: openTutor, 'aria-label': '打开助教', title: '助教' }, '🦉 ', h('span', null, '助教')); }
+function isUnlocked(L) { return L.idx === 0 || !!S.completed[LESSONS[L.idx - 1].l.id] || !!S.completed[L.l.id]; }
+
+function courseProgress(c) {
+  let st = null;
+  try { st = JSON.parse(lsGet('duolingo:' + c.id) || 'null'); } catch (e) { st = null; }
+  const total = c.units.reduce((n, u) => n + (u.lessons || []).length, 0);
+  const done = st && st.completed ? Object.keys(st.completed).length : 0;
+  return { total, done: Math.min(done, total), xp: st && st.xp ? st.xp : 0 };
+}
+function courseSwitcher() {
+  return h('button', { class: 'switcher', id: 'switcher', 'aria-haspopup': 'dialog', title: '切换课程', onclick: openPicker },
+    h('span', { class: 'sw-icon', 'aria-hidden': 'true' }, COURSE.icon || '📘'),
+    h('span', { class: 'sw-name' }, COURSE.short || COURSE.title),
+    h('span', { class: 'sw-caret', 'aria-hidden': 'true' }, '▾'));
+}
+function openPicker() {
+  closePicker();
+  const scr = h('div', { id: 'picker-scrim', onclick: closePicker });
+  const box = h('div', { class: 'picker', id: 'picker', role: 'dialog', 'aria-label': '选择课程' }, h('h2', null, '我的课程'));
+  COURSES.forEach(c => {
+    const p = courseProgress(c);
+    const pct = p.total ? Math.round(100 * p.done / p.total) : 0;
+    box.append(h('button', { class: 'pick' + (c.id === COURSE.id ? ' on' : ''), 'data-course': c.id, onclick: () => switchCourse(c.id) },
+      h('span', { class: 'pi', 'aria-hidden': 'true' }, c.icon || '📘'),
+      h('span', { class: 'pt' }, h('b', null, c.short || c.title),
+        h('small', null, `已完成 ${p.done} / ${p.total} 关 · ⚡ ${p.xp} XP`),
+        h('span', { class: 'meter' }, h('i', { style: `width:${pct}%` })))));
+  });
+  box.append(h('div', { class: 'more' }, '想学新内容？在 Claude 里说：“把 ×× 做成闯关课程，加到我的课程网站。”'));
+  document.body.append(scr, box);
+  const on = box.querySelector('.pick.on'); if (on) on.focus();
+}
+function closePicker() { const a = $('#picker'), b = $('#picker-scrim'); if (a) a.remove(); if (b) b.remove(); }
+
+function renderHome() {
+  closePicker();
+  cur = null; setPrimary(null); app.innerHTML = ''; document.body.dataset.screen = 'home';
+  window.scrollTo(0, 0);
+  app.append(topBar(
+    courseSwitcher(),
+    h('span', { class: 'chip xp', title: '总经验值' }, '⚡ ', String(S.xp)),
+    tutorButton()
+  ));
+  const w = h('div', { class: 'wrap' });
+  app.append(w);
+  if (COURSE.subtitle) w.append(h('p', { style: 'color:var(--muted);margin:14px 0 0' }, COURSE.subtitle));
+
+  const ss = S.session;
+  if (ss) {
+    const L = ss.lessonId && lessonById(ss.lessonId);
+    const name = ss.mode === 'review' ? '错题复习' : (L ? `第 ${L.ui + 1} 单元 · ${L.l.title}` : '课程');
+    const b = h('button', { class: 'btn blue', id: 'resume', onclick: () => renderStep() }, '继续');
+    w.append(h('div', { class: 'banner resume', id: 'resume-banner' },
+      h('div', { class: 'txt' }, h('b', null, '从上次停下的地方继续'), h('small', null, `${name} · 第 ${Math.min(ss.pos + 1, ss.queue.length)} / ${ss.queue.length} 步`)), b));
+    setPrimary(b);
+  }
+  if (S.review.length) {
+    w.append(h('div', { class: 'banner' },
+      h('div', { class: 'txt' }, h('b', null, `📝 错题本 · ${S.review.length} 题`), h('small', null, '答错过的题。复习时答对就会移出。')),
+      h('button', { class: 'btn ghost', id: 'review-btn', onclick: startReview }, '练习')));
+  }
+
+  const nextL = LESSONS.find(L => !S.completed[L.l.id]);
+  const offsets = [0, 44, 66, 44, 0, -44, -66, -44];
+  let n = 0;
+  COURSE.units.forEach((u, ui) => {
+    const [c, cd] = u._color;
+    w.append(h('section', { class: 'unit', style: `--c:${c};--cd:${cd}` },
+      h('small', null, `第 ${ui + 1} 单元`), h('h2', null, u.title), u.description ? h('p', null, u.description) : null));
+    const path = h('div', { class: 'path', style: `--c:${c};--cd:${cd}` });
+    (u.lessons || []).forEach(l => {
+      const L = lessonById(l.id);
+      const done = !!S.completed[l.id], open = isUnlocked(L), isCur = L === nextL;
+      const node = h('div', { class: 'node' + (done ? ' done' : '') + (!open ? ' locked' : '') + (isCur ? ' current' : ''), style: `transform:translateX(${offsets[n++ % offsets.length]}px)` },
+        isCur ? h('span', { class: 'start' }, S.completed[LESSONS[0].l.id] || L.idx ? '开始' : '从这里开始') : null,
+        h('button', { 'data-lesson': l.id, 'aria-label': `${l.title}${done ? ' (done)' : !open ? ' (locked)' : ''}`,
+          onclick: () => open ? startLesson(l.id) : toast('先完成上一关') }, done ? '✓' : !open ? '🔒' : '★'),
+        h('div', { class: 'lbl' }, l.title));
+      path.append(node);
+    });
+    w.append(path);
+  });
+  if (!nextL) w.append(h('div', { class: 'banner', style: 'margin-top:24px' }, h('div', { class: 'txt' }, h('b', null, '🏆 本课程已全部完成！'), h('small', null, '可以重玩任意一关，或者清空错题本。'))));
+
+  // Two-tap reset
+  const rb = h('button', { class: 'reset', id: 'reset-btn' }, '重置本课程进度');
+  let armed = false, timer = null;
+  rb.addEventListener('click', async () => {
+    if (!armed) {
+      armed = true; rb.classList.add('armed'); rb.textContent = '再点一次，清空本课程进度';
+      timer = setTimeout(() => { armed = false; rb.classList.remove('armed'); rb.textContent = '重置本课程进度'; }, 4000);
+      return;
+    }
+    clearTimeout(timer);
+    S = fresh(); await clearState(); await save(); renderHome(); toast('进度已重置');
+  });
+  const where = storeMode === 'artifact' ? '进度保存在 Claude 里。' : storeMode === 'local' ? '进度保存在这台设备的浏览器里。' : '这里无法保存进度（浏览器禁止了存储）。';
+  w.append(h('div', { class: 'foot' }, rb, h('p', null, where), h('p', null, '键盘：1–9 选择 · Enter 检查 / 继续 · Esc 关闭弹窗')));
+  if (!ss && nextL) setPrimary({ click: () => startLesson(nextL.l.id), disabled: false });
+  tutorSync();
+}
+
+function newSession(mode, lessonId, queue) {
+  return { mode, lessonId, queue, pos: 0, hearts: 5, combo: 0, maxCombo: 0, requeued: [], correct: 0, wrong: 0, xp: 0 };
+}
+function startLesson(id) {
+  const L = lessonById(id);
+  S.session = newSession('lesson', id, L.l.steps.map((_, i) => id + ':' + i));
+  save(); renderStep();
+}
+function startReview() {
+  const keys = shuffle(S.review.filter(k => STEPS.has(k))).slice(0, 10);
+  if (!keys.length) return toast('没有需要复习的题');
+  S.session = newSession('review', null, keys);
+  save(); renderStep();
+}
+
+function lessonTop() {
+  const ss = S.session;
+  const pct = Math.round(100 * Math.min(ss.pos, ss.queue.length) / ss.queue.length);
+  return topBar(
+    h('button', { class: 'iconbtn', id: 'quit', 'aria-label': '回到首页（进度已保存）', title: '回到首页（进度已保存）', onclick: renderHome }, '✕'),
+    h('div', { class: 'progress', role: 'progressbar', 'aria-valuenow': pct, 'aria-valuemin': 0, 'aria-valuemax': 100 }, h('i', { style: `width:${pct}%` })),
+    ss.combo >= 2 ? h('span', { class: 'chip combo', title: '连击' }, '🔥', String(ss.combo)) : null,
+    h('span', { class: 'chip hearts', id: 'hearts', title: '红心' }, '❤️ ', String(ss.hearts)),
+    tutorButton());
+}
+
+function renderStep() {
+  const ss = S.session;
+  if (!ss) return renderHome();
+  if (ss.hearts <= 0) return renderOut();
+  if (ss.pos >= ss.queue.length) return finishSession();
+  const key = ss.queue[ss.pos];
+  const ent = STEPS.get(key);
+  if (!ent) { ss.pos++; save(); return renderStep(); }
+  const s = ent.s;
+  cur = { key, s, L: ent.L, answered: false, result: null, ex: null };
+  app.innerHTML = ''; document.body.dataset.screen = 'lesson'; window.scrollTo(0, 0);
+  app.append(lessonTop());
+  const stage = h('main', { class: 'wrap stage', id: 'stage' });
+  app.append(stage);
+  const bar = h('footer', { class: 'bar', id: 'bar' });
+  const barIn = h('div', { class: 'wrap' });
+  bar.append(barIn); app.append(bar);
+
+  if (s.type === 'card') {
+    stage.append(h('div', { class: 'kind' }, ss.mode === 'review' ? '复习' : `第 ${ent.L.ui + 1} 单元 · ${ent.L.l.title}`));
+    const card = h('article', { class: 'lcard' });
+    if (s.title) card.append(h('h2', null, s.title));
+    card.append(h('div', { html: md(s.body) }));
+    if (s.equation) card.append(h('div', { class: 'eq' }, s.equation));
+    if (s.flag) card.append(flagBox(s.flag));
+    stage.append(card);
+    const b = h('button', { class: 'btn wide', id: 'primary', onclick: () => { ss.pos++; save(); renderStep(); } }, '继续');
+    barIn.append(b); setPrimary(b);
+  } else {
+    stage.append(h('div', { class: 'kind' }, (ss.mode === 'review' ? '复习 · ' : '') + TYPE_LABEL[s.type]));
+    const b = h('button', { class: 'btn wide', id: 'primary', disabled: true, onclick: check }, '检查');
+    const onChange = () => { b.disabled = !cur.ex.ready(); };
+    cur.ex = EX[s.type](s, stage, onChange);
+    barIn.append(b); setPrimary(b);
+  }
+  tutorSync();
+}
+
+function flagBox(f) {
+  const title = typeof f === 'object' ? (f.title || '注意') : '注意';
+  const text = typeof f === 'object' ? f.text : f;
+  return h('div', { class: 'flag', role: 'note' }, h('b', null, '⚠️ ' + title), h('div', { html: md(text) }));
+}
+
+function check() {
+  if (!cur || cur.answered || !cur.ex || !cur.ex.ready()) return;
+  const ss = S.session, s = cur.s;
+  const r = cur.ex.grade();
+  cur.answered = true; cur.result = r;
+  cur.ex.lock(r);
+  S.stats.answered++;
+  let gained = 0, bonus = 0;
+  if (r.ok) {
+    ss.combo++; ss.maxCombo = Math.max(ss.maxCombo, ss.combo); ss.correct++; S.stats.correct++;
+    bonus = ss.combo >= 3 ? Math.min(ss.combo - 2, 5) * 2 : 0;
+    gained = 10 + bonus; ss.xp += gained; S.xp += gained;
+    if (ss.mode === 'review') removeReview(cur.key);
+  } else {
+    ss.combo = 0; ss.wrong++; ss.hearts = Math.max(0, ss.hearts - 1);
+    addReview(cur.key);
+    if (ss.hearts > 0 && !ss.requeued.includes(cur.key)) { ss.queue.push(cur.key); ss.requeued.push(cur.key); }
+  }
+  ss.pos++;
+  save();                      // persist after every answer
+  // refresh header (hearts / combo / progress)
+  const top = app.querySelector('.top'); if (top) top.replaceWith(lessonTop());
+
+  const bar = $('#bar'); bar.className = 'bar ' + (r.ok ? 'ok' : 'bad');
+  const barIn = bar.firstChild; barIn.innerHTML = '';
+  const fb = h('div', { class: 'fb', id: 'feedback', 'aria-live': 'polite' });
+  fb.append(h('h3', null, r.ok ? (ss.combo >= 3 ? `🔥 连击 ×${ss.combo}！` : pick(['答对了！', '漂亮！', '完全正确！', '好样的！'])) : '差一点',
+    r.ok ? h('span', { class: 'xp' }, `+${gained} XP${bonus ? `（连击 +${bonus}）` : ''}`) : null));
+  if (!r.ok) fb.append(h('p', { class: 'ans' }, '正确答案：', r.correct));
+  if (!r.ok && r.why) fb.append(h('p', { html: '<b>为什么不选它：</b>' + inline(r.why) }));
+  if (s.explain) fb.append(h('p', { html: inline(s.explain) }));
+  if (!r.ok && ss.hearts > 0 && ss.requeued.includes(cur.key) && ss.queue.lastIndexOf(cur.key) > ss.pos - 1) fb.append(h('p', { style: 'opacity:.8;font-size:13px' }, '这题在本关结束前还会再出现一次。'));
+  const cont = h('button', { class: 'btn' + (r.ok ? '' : ' red'), id: 'primary', onclick: renderStep }, '继续');
+  const ask = h('button', { class: 'btn ghost', id: 'ask-why', onclick: openTutor }, r.ok ? '为什么？' : '讲解');
+  barIn.append(fb, h('div', { class: 'row' }, ask, cont));
+  setPrimary(cont);
+  tutorSync();
+}
+const pick = a => a[Math.floor(Math.random() * a.length)];
+
+function finishSession() {
+  const ss = S.session;
+  let bonus = 0;
+  if (ss.mode === 'lesson') { S.completed[ss.lessonId] = true; bonus = ss.wrong === 0 ? 15 : 5; }
+  S.xp += bonus; ss.xp += bonus;
+  S.session = null; save();
+  cur = null; app.innerHTML = ''; document.body.dataset.screen = 'done';
+  const total = ss.correct + ss.wrong;
+  const acc = total ? Math.round(100 * ss.correct / total) : 100;
+  const w = h('div', { class: 'wrap center', id: 'summary' },
+    h('div', { class: 'big' }, ss.wrong === 0 ? '🏆' : '🎉'),
+    h('h2', null, ss.mode === 'review' ? '复习完成！' : (ss.wrong === 0 ? '满分通关！' : '本关完成！')),
+    h('p', { style: 'color:var(--muted)' }, bonus ? `含通关奖励 +${bonus} XP。` : ''),
+    h('div', { class: 'tiles' },
+      h('div', { class: 'stat', style: '--c:var(--gold)' }, h('small', null, '获得经验'), h('b', { id: 'sum-xp' }, '⚡ ' + ss.xp)),
+      h('div', { class: 'stat', style: '--c:var(--green)' }, h('small', null, '正确率'), h('b', null, acc + '%')),
+      h('div', { class: 'stat', style: '--c:#ff9600' }, h('small', null, '最高连击'), h('b', null, '🔥 ' + ss.maxCombo))));
+  const b = h('button', { class: 'btn', id: 'primary', onclick: renderHome }, '继续');
+  w.append(b); app.append(w); setPrimary(b); tutorSync();
+}
+
+function renderOut() {
+  const ss = S.session;
+  S.session = null; save();
+  cur = null; app.innerHTML = ''; document.body.dataset.screen = 'out';
+  const retry = h('button', { class: 'btn', id: 'primary', onclick: () => ss.mode === 'review' ? startReview() : startLesson(ss.lessonId) }, '再试一次');
+  app.append(h('div', { class: 'wrap center', id: 'out' },
+    h('div', { class: 'big' }, '💔'), h('h2', null, '红心用完了'),
+    h('p', null, '别担心，答错的题已经存进错题本。'),
+    h('div', { class: 'row', style: 'max-width:420px;margin:24px auto 0' }, h('button', { class: 'btn ghost', onclick: renderHome }, '首页'), retry)));
+  setPrimary(retry); tutorSync();
+}
+
+/* ================= exercises ================= */
+// Each returns { ready(), grade() -> {ok,user,correct,why?}, lock(r), key(k) -> bool, view() -> text for tutor }
+const EX = {
+  mcq(s, root, onChange) {
+    const order = shuffle(range(s.options.length));
+    let sel = null, locked = false;
+    root.append(h('div', { class: 'prompt', html: inline(s.prompt) }));
+    const btns = order.map((oi, di) => h('button', { class: 'choice', 'data-opt': oi, onclick: () => choose(di) },
+      h('span', { class: 'kbd' }, String(di + 1)), h('span', { html: inline(s.options[oi]) })));
+    root.append(h('div', { class: 'choices' }, btns));
+    function choose(di) { if (locked) return; sel = di; btns.forEach((b, i) => b.classList.toggle('sel', i === di)); onChange(); }
+    return {
+      ready: () => sel != null,
+      key(k) { const n = +k; if (n >= 1 && n <= btns.length) { choose(n - 1); return true; } return false; },
+      grade() { const oi = order[sel]; return { ok: oi === s.answer, user: s.options[oi], correct: s.options[s.answer], why: oi !== s.answer && s.why ? s.why[oi] : null }; },
+      lock() { locked = true; btns.forEach((b, i) => { b.disabled = true; b.classList.remove('sel'); if (order[i] === s.answer) b.classList.add('right'); else if (i === sel) b.classList.add('wrong'); }); },
+      view: () => 'Prompt: ' + plain(s.prompt) + '\nOptions as shown: ' + order.map((oi, i) => `${i + 1}) ${plain(s.options[oi])}`).join('  ') +
+        (sel != null && !locked ? `\nLearner currently has option ${sel + 1} selected (not yet checked).` : ''),
+    };
+  },
+
+  tf(s, root, onChange) {
+    let sel = null, locked = false;
+    root.append(h('div', { class: 'prompt' }, s.prompt || '判断对错'));
+    root.append(h('div', { class: 'statement', html: inline(s.statement) }));
+    const vals = [true, false];
+    const btns = vals.map((v, i) => h('button', { class: 'choice', 'data-tf': String(v), onclick: () => choose(i) }, h('span', { class: 'kbd' }, String(i + 1)), v ? '对' : '错'));
+    root.append(h('div', { class: 'choices tf' }, btns));
+    function choose(i) { if (locked) return; sel = i; btns.forEach((b, j) => b.classList.toggle('sel', i === j)); onChange(); }
+    return {
+      ready: () => sel != null,
+      key(k) { if (k === '1' || k === '2') { choose(+k - 1); return true; } const l = k.toLowerCase(); if (l === 't' || l === 'f') { choose(l === 't' ? 0 : 1); return true; } return false; },
+      grade() { const v = vals[sel]; return { ok: v === s.answer, user: v ? '对' : '错', correct: s.answer ? '对' : '错' }; },
+      lock() { locked = true; btns.forEach((b, i) => { b.disabled = true; b.classList.remove('sel'); if (vals[i] === s.answer) b.classList.add('right'); else if (i === sel) b.classList.add('wrong'); }); },
+      view: () => 'Statement to judge true/false: ' + plain(s.statement),
+    };
+  },
+
+  match(s, root, onChange) {
+    const n = s.pairs.length;
+    const Lo = shuffle(range(n)), Ro = shuffle(range(n));
+    let selL = null, selR = null, locked = false, mistakes = 0;
+    const matched = new Set(), wrongPairs = [];
+    root.append(h('div', { class: 'prompt', html: inline(s.prompt || '点击配对') }));
+    const lab = i => String((i + 1) % 10);
+    const lb = Lo.map((pi, i) => h('button', { class: 'tile', 'data-side': 'L', 'data-pair': pi, onclick: () => tap('L', i) }, h('span', { class: 'kbd' }, lab(i)), h('span', { html: inline(s.pairs[pi][0]) })));
+    const rb = Ro.map((pi, i) => h('button', { class: 'tile', 'data-side': 'R', 'data-pair': pi, onclick: () => tap('R', i) }, h('span', { class: 'kbd' }, lab(n + i)), h('span', { html: inline(s.pairs[pi][1]) })));
+    root.append(h('div', { class: 'match' }, h('div', { class: 'col' }, lb), h('div', { class: 'col' }, rb)));
+    root.append(h('div', { class: 'hint' }, '配错一次就算这题答错。'));
+    function paint() { lb.forEach((b, i) => b.classList.toggle('sel', i === selL)); rb.forEach((b, i) => b.classList.toggle('sel', i === selR)); }
+    function tap(side, i) {
+      if (locked) return;
+      const pi = side === 'L' ? Lo[i] : Ro[i];
+      if (matched.has(pi)) return;
+      if (side === 'L') selL = selL === i ? null : i; else selR = selR === i ? null : i;
+      paint();
+      if (selL != null && selR != null) {
+        const a = lb[selL], b = rb[selR];
+        if (Lo[selL] === Ro[selR]) { matched.add(Lo[selL]); a.classList.add('done'); b.classList.add('done'); a.disabled = b.disabled = true; }
+        else {
+          mistakes++; wrongPairs.push(plain(s.pairs[Lo[selL]][0]) + ' ↔ ' + plain(s.pairs[Ro[selR]][1]));
+          [a, b].forEach(x => { x.classList.remove('shake'); void x.offsetWidth; x.classList.add('shake'); setTimeout(() => x.classList.remove('shake'), 400); });
+        }
+        selL = selR = null; paint(); onChange();
+        if (matched.size === n) setTimeout(check, 350);
+      }
+    }
+    return {
+      ready: () => matched.size === n,
+      key(k) { if (!/^[0-9]$/.test(k)) return false; const v = k === '0' ? 10 : +k; if (v <= n) { tap('L', v - 1); return true; } if (v <= 2 * n) { tap('R', v - n - 1); return true; } return false; },
+      grade() { return { ok: mistakes === 0, user: mistakes ? `配错 ${mistakes} 次：${wrongPairs.join('；')}` : '全部配对正确', correct: s.pairs.map(p => plain(p[0]) + ' → ' + plain(p[1])).join(' · ') }; },
+      lock() { locked = true; },
+      view: () => 'Prompt: ' + plain(s.prompt || 'Match the pairs') + '\nLeft column: ' + Lo.map(pi => plain(s.pairs[pi][0])).join(' | ') + '\nRight column: ' + Ro.map(pi => plain(s.pairs[pi][1])).join(' | ') +
+        (matched.size ? `\nAlready matched correctly: ${[...matched].map(pi => plain(s.pairs[pi][0])).join(', ')}` : ''),
+    };
+  },
+
+  order(s, root, onChange) {
+    const n = s.items.length;
+    let bank = shuffle(range(n));
+    for (let t = 0; t < 5 && n > 1 && bank.every((v, i) => v === i); t++) bank = shuffle(range(n));
+    let seq = [], locked = false;
+    root.append(h('div', { class: 'prompt', html: inline(s.prompt || '按正确顺序排列') }));
+    const seqEl = h('div', { class: 'seq', id: 'seq' });
+    const bankBtns = bank.map((ii, bi) => h('button', { class: 'tile', 'data-item': ii, onclick: () => add(bi) }, h('span', { class: 'kbd' }, String(bi + 1)), h('span', { html: inline(s.items[ii]) })));
+    root.append(seqEl, h('div', { class: 'bank' }, bankBtns), h('div', { class: 'hint' }, '点击加入 · 点已放好的项可以移除 · Backspace 撤销'));
+    function paint(result) {
+      seqEl.innerHTML = '';
+      if (!seq.length) seqEl.append(h('span', { class: 'ph' }, '按顺序点击下面的选项'));
+      seq.forEach((bi, pos) => {
+        const ii = bank[bi];
+        const t = h('button', { class: 'tile' + (result ? (ii === pos ? ' right' : ' wrong') : ''), disabled: locked, onclick: () => { if (!locked) { seq.splice(pos, 1); paint(); onChange(); } } },
+          h('span', { class: 'pos' }, String(pos + 1) + '.'), h('span', { html: inline(s.items[ii]) }));
+        seqEl.append(t);
+      });
+      bankBtns.forEach((b, bi) => { const used = seq.includes(bi); b.classList.toggle('used', used); b.disabled = used || locked; });
+    }
+    function add(bi) { if (locked || seq.includes(bi)) return; seq.push(bi); paint(); onChange(); }
+    paint();
+    return {
+      ready: () => seq.length === n,
+      key(k) { if (k === 'Backspace') { if (seq.length && !locked) { seq.pop(); paint(); onChange(); } return true; } const v = +k; if (v >= 1 && v <= n) { add(v - 1); return true; } return false; },
+      grade() { const ok = seq.every((bi, pos) => bank[bi] === pos); return { ok, user: seq.map(bi => plain(s.items[bank[bi]])).join(' → '), correct: s.items.map(plain).join(' → ') }; },
+      lock() { locked = true; paint(true); },
+      view: () => 'Prompt: ' + plain(s.prompt || 'Put these in order') + '\nItems (shuffled): ' + bank.map(ii => plain(s.items[ii])).join(' | ') +
+        (seq.length ? '\nLearner has placed so far: ' + seq.map(bi => plain(s.items[bank[bi]])).join(' → ') : ''),
+    };
+  },
+
+  numeric(s, root, onChange) {
+    const tol = typeof s.tolerance === 'number' ? s.tolerance : 0.01;
+    root.append(h('div', { class: 'prompt', html: inline(s.prompt) }));
+    const inp = h('input', { id: 'num', type: 'text', inputmode: 'decimal', autocomplete: 'off', placeholder: '你的答案', 'aria-label': '输入数字答案', oninput: onChange });
+    root.append(h('div', { class: 'num' }, inp, s.unit ? h('span', { class: 'unit' }, s.unit) : null));
+    root.append(h('div', { class: 'hint' }, `误差在 ${fmtNum(tol * 100)}% 以内都算对。`));
+    setTimeout(() => { if (matchMedia('(pointer:fine)').matches) inp.focus(); }, 30);
+    const parse = () => {
+      let v = inp.value.trim().replace(/[\s_]/g, '').replace(/[−–]/g, '-').replace(/[×x]10\^?/i, 'e');
+      if (/^-?\d+,\d+$/.test(v) && !/,\d{3}$/.test(v)) v = v.replace(',', '.'); else v = v.replace(/,/g, '');
+      if (!/^[-+]?(\d+\.?\d*|\.\d+)(e[-+]?\d+)?$/i.test(v)) return NaN;
+      return Number(v);
+    };
+    return {
+      ready: () => isFinite(parse()),
+      key: () => false,
+      grade() {
+        const x = parse(), a = s.answer;
+        const ok = a === 0 ? Math.abs(x) <= tol : Math.abs(x - a) <= tol * Math.abs(a);
+        const u = s.unit ? ' ' + s.unit : '';
+        return { ok, user: inp.value.trim() + u, correct: fmtNum(a) + u };
+      },
+      lock(r) { inp.disabled = true; inp.classList.add(r.ok ? 'right' : 'wrong'); },
+      view: () => 'Prompt: ' + plain(s.prompt) + (s.unit ? `\nUnit: ${s.unit}` : '') + `\nAccepted tolerance: ±${fmtNum(tol * 100)}% relative` +
+        (inp.value.trim() && !inp.disabled ? `\nLearner has typed (not yet checked): ${inp.value.trim()}` : ''),
+    };
+  },
+};
+
+/* ================= keyboard ================= */
+document.addEventListener('keydown', e => {
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  const t = e.target;
+  if (t.closest && t.closest('#tutor')) { if (e.key === 'Escape') closeTutor(); return; }
+  if (e.key === 'Escape') { if ($('#picker')) closePicker(); else if (T.open) closeTutor(); return; }
+  if ($('#picker')) return;
+  if (T.open) return;
+  if (e.key === 'Enter') {
+    if (primary && !primary.disabled) { e.preventDefault(); primary.click(); }
+    return;
+  }
+  const typing = t.tagName === 'INPUT' || t.tagName === 'TEXTAREA';
+  if (typing) return;
+  if (cur && !cur.answered && cur.ex && cur.ex.key(e.key)) e.preventDefault();
+});
+
+/* ================= tutor ================= */
+const T = { open: false, itemKey: null, msgs: [], auto: new Set(), busy: false };
+const tutorEl = $('#tutor'), scrim = $('#scrim');
+const CHIPS = {
+  browsing: ['这门课会学什么？', '我该从哪里开始？', '总结一下核心概念'],
+  reading: ['讲得再简单一点', '举个例子', '这个有什么用？'],
+  unanswered: ['给我一个提示', '讲讲关键概念', '我该注意什么？'],
+  correct: ['为什么这是对的？', '这里常见的错误是什么？', '来一个更难的例子'],
+  wrong: ['我错在哪里？', '讲解正确答案', '再出一道类似的题'],
+};
+const AUTO = {
+  reading: '用更简单的话解释这张卡片。',
+  unanswered: '给我一个提示，但不要直接告诉我答案。',
+  correct: '为什么这是正确答案？',
+  wrong: '我的答案错在哪里？',
+};
+const PHASE_LABEL = { browsing: '首页', reading: '阅读中', unanswered: '作答前', correct: '已作答 · 正确', wrong: '已作答 · 错误' };
+
+function tutorCtx() {
+  if (!cur) return { key: 'home', phase: 'browsing', label: COURSE.title + ' · 课程总览' };
+  const s = cur.s;
+  const phase = !isEx(s) ? 'reading' : !cur.answered ? 'unanswered' : cur.result.ok ? 'correct' : 'wrong';
+  const label = s.type === 'card' ? (s.title || 'Lesson card') : `${TYPE_LABEL[s.type]}: ${plain(s.prompt || s.statement || '')}`;
+  return { key: cur.key, phase, label };
+}
+function describeItem(ctx) {
+  if (!cur) return 'The learner is on the home screen.\nUnits: ' + COURSE.units.map((u, i) => `${i + 1}. ${u.title}` + (u.lessons ? ' (' + u.lessons.map(l => l.title).join('; ') + ')' : '')).join('\n');
+  const s = cur.s, lines = [];
+  lines.push(`Location: Unit ${cur.L.ui + 1} "${cur.L.u.title}", lesson "${cur.L.l.title}".`);
+  if (s.type === 'card') {
+    lines.push('ITEM: lesson card', 'Title: ' + (s.title || ''), 'Text: ' + plain(s.body));
+    if (s.equation) lines.push('Equation: ' + s.equation);
+  } else {
+    lines.push('ITEM: ' + TYPE_LABEL[s.type] + ' exercise', cur.ex.view());
+    if (ctx.phase === 'unanswered') {
+      lines.push('STATUS: NOT ANSWERED YET. The correct answer is deliberately withheld from you. Hints only.');
+    } else {
+      lines.push(`STATUS: ANSWERED — ${cur.result.ok ? 'CORRECT' : 'INCORRECT'}`, "Learner's answer: " + plain(cur.result.user), 'Correct answer: ' + plain(cur.result.correct));
+      if (cur.result.why) lines.push('Course note on the chosen option: ' + plain(cur.result.why));
+      if (s.explain) lines.push('Course explanation: ' + plain(s.explain));
+    }
+  }
+  if (s.flag) lines.push('Correction/caveat flagged by the course author: ' + plain(typeof s.flag === 'object' ? s.flag.text : s.flag));
+  return lines.join('\n');
+}
+function lessonNotes() {
+  if (!cur) return '';
+  let txt = cur.L.l.steps.filter(x => x.type === 'card').map(c => `## ${c.title || ''}\n${plain(c.body)}${c.equation ? '\nEquation: ' + c.equation : ''}${c.flag ? '\nCaveat: ' + plain(typeof c.flag === 'object' ? c.flag.text : c.flag) : ''}`).join('\n\n');
+  if (txt.length > 3500) txt = txt.slice(0, 3500) + '…';
+  return txt;
+}
+function systemPrompt(ctx) {
+  const rules = {
+    browsing: 'The learner is browsing the course map. Help them get oriented. Keep it brief.',
+    reading: 'The learner is reading a lesson card. Explain it more simply, with a concrete example if useful.',
+    unanswered: 'The learner has NOT answered this exercise yet. Give a hint only: point to the relevant idea, a question to ask themselves, or a first step. NEVER state the answer, never say which option/value is correct, never eliminate options down to one, and never confirm or deny a guess. If they ask for the answer, kindly decline and give a better hint. For numeric items, you may describe the method but do not compute the final number.',
+    correct: 'The learner answered correctly. Explain briefly why the answer is right, reinforcing the key idea.',
+    wrong: "The learner answered incorrectly. Explain specifically why THEIR choice is wrong (what misconception it reflects), then why the correct answer is right. Be encouraging.",
+  }[ctx.phase];
+  return [
+    `You are a friendly, encouraging tutor inside a Duolingo-style course titled "${COURSE.title}".`,
+    COURSE.tutor && COURSE.tutor.context ? 'Course background: ' + COURSE.tutor.context : '',
+    'Style: short sentences, plain words, under 120 words unless asked for more. Use **bold** sparingly and "- " bullets only when listing. No headings.',
+    'Language: reply in Simplified Chinese. Keep code, function names and parameter names in English.',
+    'Stay grounded in the course material below; if a caveat/correction is flagged, respect it.',
+    'RULE FOR THIS MOMENT: ' + rules,
+    '--- CURRENT ITEM ---\n' + describeItem(ctx),
+    cur ? '--- LESSON NOTES ---\n' + lessonNotes() : '',
+  ].filter(Boolean).join('\n\n');
+}
+function getKey() { try { return localStorage.getItem(KEY_API) || ''; } catch (e) { return ''; } }
+async function callClaude(system, messages) {
+  const headers = { 'content-type': 'application/json' };
+  const key = getKey();
+  if (key) Object.assign(headers, { 'x-api-key': key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' });
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST', headers,
+    body: JSON.stringify({ model: (COURSE.tutor && COURSE.tutor.model) || 'claude-sonnet-5-5', max_tokens: 700, system, messages }),
+  });
+  if (!res.ok) { let m = res.status + ''; try { const j = await res.json(); m += ' ' + (j.error && j.error.message || ''); } catch (e) {} throw new Error(m); }
+  const j = await res.json();
+  return (j.content || []).filter(b => b.type === 'text').map(b => b.text).join('\n').trim() || '(no reply)';
+}
+
+function tutorSync() {
+  const ctx = tutorCtx();
+  if (ctx.key !== T.itemKey) { T.itemKey = ctx.key; T.msgs = []; T.phase = ctx.phase; }
+  else if (ctx.phase !== T.phase) { if (T.msgs.length) T.msgs.push({ role: 'sys', text: PHASE_LABEL[ctx.phase] }); T.phase = ctx.phase; }
+  $('#tutor-item').textContent = ctx.label.length > 140 ? ctx.label.slice(0, 140) + '…' : ctx.label;
+  const ph = $('#tutor-phase'); ph.textContent = PHASE_LABEL[ctx.phase]; ph.className = 'phase ' + ctx.phase;
+  const chips = $('#tutor-chips'); chips.innerHTML = '';
+  CHIPS[ctx.phase].forEach(c => chips.append(h('button', { type: 'button', onclick: () => ask(c) }, c)));
+  paintMsgs();
+  if (T.open) maybeAuto(ctx);
+}
+function maybeAuto(ctx) {
+  const k = ctx.key + '|' + ctx.phase;
+  if (!AUTO[ctx.phase] || T.auto.has(k) || T.busy) return;
+  T.auto.add(k); ask(AUTO[ctx.phase], true);
+}
+function paintMsgs() {
+  const box = $('#tutor-msgs'); box.innerHTML = '';
+  if (!T.msgs.length && !T.busy) box.append(h('div', { class: 'msg bot' }, cur ? '关于这一题，随便问。作答前我只给提示，作答后再详细讲解。' : '你好！打开一关，我就能帮你看正在做的题。'));
+  T.msgs.forEach(m => {
+    if (m.role === 'sys') box.append(h('div', { class: 'msg sys' }, '— ' + m.text + ' —'));
+    else if (m.role === 'err') box.append(h('div', { class: 'msg err' }, m.text));
+    else box.append(h('div', { class: 'msg ' + (m.role === 'user' ? 'user' : 'bot'), html: m.role === 'user' ? esc(m.text) : md(m.text) }));
+  });
+  if (T.busy) box.append(h('div', { class: 'msg bot dots' }, '思考中'));
+  box.scrollTop = box.scrollHeight;
+}
+async function ask(text) {
+  text = String(text || '').trim();
+  if (!text || T.busy) return;
+  const ctx = tutorCtx();
+  const itemAtSend = T.itemKey;
+  T.msgs.push({ role: 'user', text });
+  T.busy = true; paintMsgs();
+  const apiMsgs = [];
+  T.msgs.filter(m => m.role === 'user' || m.role === 'assistant').forEach(m => {
+    const last = apiMsgs[apiMsgs.length - 1];
+    if (last && last.role === m.role) last.content += '\n\n' + m.text; else apiMsgs.push({ role: m.role, content: m.text });
+  });
+  try {
+    const reply = await callClaude(systemPrompt(ctx), apiMsgs);
+    if (T.itemKey === itemAtSend) T.msgs.push({ role: 'assistant', text: reply });
+  } catch (err) {
+    if (T.itemKey === itemAtSend) T.msgs.push({ role: 'err', text: `助教连接失败（${err.message}）。请在下方填写 Anthropic API key 后再试。` });
+  } finally { T.busy = false; paintMsgs(); }
+}
+function openTutor() {
+  T.open = true; tutorEl.classList.add('open'); tutorEl.setAttribute('aria-hidden', 'false'); scrim.hidden = false;
+  tutorSync();
+  setTimeout(() => { if (matchMedia('(pointer:fine)').matches) $('#tutor-input').focus(); }, 60);
+}
+function closeTutor() { T.open = false; tutorEl.classList.remove('open'); tutorEl.setAttribute('aria-hidden', 'true'); scrim.hidden = true; if (document.activeElement) document.activeElement.blur(); }
+$('#tutor-close').addEventListener('click', closeTutor);
+scrim.addEventListener('click', closeTutor);
+$('#tutor-form').addEventListener('submit', e => { e.preventDefault(); const i = $('#tutor-input'); const v = i.value; i.value = ''; ask(v); });
+$('#tutor-input').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); $('#tutor-form').requestSubmit(); } });
+const keyInp = $('#tutor-key');
+keyInp.value = getKey();
+keyInp.addEventListener('change', () => { try { keyInp.value.trim() ? localStorage.setItem(KEY_API, keyInp.value.trim()) : localStorage.removeItem(KEY_API); toast('API key 已保存在这台设备'); } catch (e) { toast('这里无法保存 key'); } });
+
+/* ================= boot ================= */
+window.__duo = { get state() { return S; }, get cur() { return cur; }, save, tutor: T, systemPrompt: () => systemPrompt(tutorCtx()) };
+(async () => {
+  S = sanitize(await loadState());
+  renderHome();
+})();
+})();
+</script>
+</body>
+</html>
