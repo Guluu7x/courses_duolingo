@@ -21,6 +21,21 @@ build_site.py            检查所有课程并生成 index.html
    `{ "file": "list-comprehension.json", "short": "列表推导式", "icon": "🧩" }`
 3. 运行 `python3 build_site.py`，没有 ERROR 就提交并推送。GitHub Pages 会自动更新。
 
+## 题目可以带的资料（让每道题不用翻讲义也能做）
+
+每个知识卡或题目都可以加这些字段：
+
+| 字段 | 显示成 |
+|---|---|
+| `code` | 题目下方的 Python 代码框（带高亮，太长可以左右滑） |
+| `output` | 代码框下方的“输出 OUTPUT”框 |
+| `codeCaption` | 代码框标题，默认 PYTHON，例如写 `命令行 TERMINAL` |
+| `terms` | 术语对照表，例如 `[["标量", "scalar"], ["向量", "vector"]]` |
+| `ref` | ⓘ 按钮，点开是底部弹出的资料卡：`{"title": "...", "body": "...", "code": "...", "output": "..."}`，也可以是一个列表 |
+
+答题时右上角的 📖 按钮会列出本关已经看过的知识卡。
+写课程时的规则：中文术语第一次出现时在括号里写英文；题目里提到讲义的代码，要么用 `code` 直接放出来，要么用 `ref` 放进 ⓘ。
+
 ## 进度保存在哪里
 
 进度存在打开网站的那个浏览器里（localStorage）。换设备、换浏览器，

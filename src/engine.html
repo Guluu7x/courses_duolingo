@@ -20,6 +20,7 @@
   --gold:#ffc800; --gold-d:#e5a500; --ok-bg:#d7ffb8; --ok-ink:#58a700; --bad-bg:#ffdfe0; --bad-ink:#ea2b2b;
   --flag-bg:#fff5d6; --flag-line:#f0b400; --eq-bg:#eef7ff; --eq-line:#84d8ff; --sel-bg:#ddf4ff;
   --shadow:0 8px 30px rgba(0,0,0,.18);
+  --code-bg:#f5f8fb; --code-ink:#24292f; --code-k:#8250df; --code-s:#0a7a3e; --code-c:#7d8792; --code-n:#0b63c4; --term:#1580b8;
   color-scheme:light;
 }
 @media (prefers-color-scheme:dark){
@@ -27,6 +28,7 @@
     --bg:#131f24; --ink:#f1f7fb; --muted:#9fb0ba; --line:#37464f; --soft:#1b2a31; --card:#18262c;
     --ok-bg:#1d3a10; --ok-ink:#79d634; --bad-bg:#3d1c1e; --bad-ink:#ff7b7b;
     --flag-bg:#3a3115; --flag-line:#c89a10; --eq-bg:#132f3f; --eq-line:#1f6f99; --sel-bg:#16384a;
+    --code-bg:#0e191e; --code-ink:#e6edf3; --code-k:#d2a8ff; --code-s:#7ee787; --code-c:#8b98a3; --code-n:#79c0ff; --term:#5fc8ff;
     color-scheme:dark;
   }
 }
@@ -34,6 +36,7 @@
   --bg:#131f24; --ink:#f1f7fb; --muted:#9fb0ba; --line:#37464f; --soft:#1b2a31; --card:#18262c;
   --ok-bg:#1d3a10; --ok-ink:#79d634; --bad-bg:#3d1c1e; --bad-ink:#ff7b7b;
   --flag-bg:#3a3115; --flag-line:#c89a10; --eq-bg:#132f3f; --eq-line:#1f6f99; --sel-bg:#16384a;
+  --code-bg:#0e191e; --code-ink:#e6edf3; --code-k:#d2a8ff; --code-s:#7ee787; --code-c:#8b98a3; --code-n:#79c0ff; --term:#5fc8ff;
   color-scheme:dark;
 }
 *{box-sizing:border-box}
@@ -113,20 +116,37 @@ button:disabled{cursor:default}
 
 /* ---------- lesson ---------- */
 .stage{padding-top:22px;padding-bottom:calc(190px + env(safe-area-inset-bottom,0px))}
-.kind{font-size:13px;font-weight:900;text-transform:uppercase;letter-spacing:.07em;color:var(--blue);margin-bottom:6px}
+.kind{font-size:13px;font-weight:900;letter-spacing:.04em;color:var(--blue);margin-bottom:8px}
 .prompt{font-size:21px;font-weight:800;line-height:1.35;margin:0 0 18px}
-.lcard{border:2px solid var(--line);border-radius:18px;padding:18px 18px 8px;background:var(--card)}
-.lcard h2{margin:0 0 8px;font-size:22px}
+.lcard{border:2px solid var(--line);border-radius:18px;padding:18px 18px 6px;background:var(--card);font-size:17px;line-height:1.65}
+.lcard h2{margin:0 0 10px;font-size:21px;line-height:1.3;text-wrap:balance}
 .lcard p{margin:0 0 12px}
 .lcard ul{margin:0 0 12px;padding-left:22px}
-code{background:var(--soft);border-radius:6px;padding:1px 5px;font-size:.92em}
-.eq{margin:4px 0 14px;padding:14px 16px;background:var(--eq-bg);border:2px solid var(--eq-line);border-radius:14px;font:600 18px/1.4 ui-monospace,"SF Mono",Menlo,Consolas,monospace;overflow-x:auto;text-align:center;white-space:pre-wrap}
+.lcard li{margin:0 0 6px}
+.mono,code,.eq,.code pre{font-family:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace}
+code{background:var(--soft);border:1px solid var(--line);border-radius:6px;padding:0 5px;font-size:.88em;overflow-wrap:anywhere}
+.eq{margin:4px 0 14px;padding:12px 14px;background:var(--eq-bg);border:2px solid var(--eq-line);border-radius:14px;font-weight:600;font-size:15px;line-height:1.5;overflow-x:auto;white-space:pre;-webkit-overflow-scrolling:touch}
+.code{margin:4px 0 14px;border:2px solid var(--line);border-radius:14px;background:var(--code-bg);overflow:hidden}
+.code .cap{display:block;padding:7px 12px 0;font-size:11px;font-weight:900;letter-spacing:.08em;color:var(--muted)}
+.code pre{margin:0;padding:6px 12px 12px;overflow-x:auto;white-space:pre;font-size:14px;line-height:1.55;color:var(--code-ink);-webkit-overflow-scrolling:touch}
+.code.out{background:var(--soft);border-style:dashed}
+.code .k{color:var(--code-k);font-weight:700}.code .s{color:var(--code-s)}.code .c{color:var(--code-c);font-style:italic}.code .n{color:var(--code-n)}
+.terms{margin:4px 0 14px;border:2px solid var(--line);border-radius:14px;overflow:hidden}
+.terms .cap{display:block;padding:7px 12px 6px;font-size:11px;font-weight:900;letter-spacing:.08em;color:var(--muted);background:var(--soft)}
+.terms .tr{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:10px;padding:8px 12px;border-top:1px solid var(--line);font-size:15px;align-items:baseline}
+.terms .en{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-weight:700;color:var(--term);overflow-wrap:anywhere}
+.ctx{margin:0 0 16px}
+.ctx .code{margin:0 0 10px}
+.refs{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 18px}
+.refbtn{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:8px 14px;border:2px solid var(--eq-line);border-radius:999px;background:var(--eq-bg);font-weight:800;font-size:14px;text-align:left;box-shadow:0 3px 0 var(--eq-line)}
+.refbtn:active{transform:translateY(2px);box-shadow:0 1px 0 var(--eq-line)}
+.refbtn .i{flex:none;display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--blue);color:#fff;font:900 13px/1 Georgia,serif}
 .flag{margin:4px 0 14px;padding:12px 14px;background:var(--flag-bg);border-left:6px solid var(--flag-line);border-radius:12px;font-size:15px}
 .flag b{display:block;font-size:12px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px}
 .flag p{margin:0}
 .choices{display:grid;gap:10px}
-.choice,.tile{display:flex;align-items:center;gap:12px;text-align:left;width:100%;border:2px solid var(--line);border-radius:14px;background:var(--card);padding:12px 14px;
-  box-shadow:0 3px 0 var(--line);font-size:16px;min-height:52px;transition:background .1s,border-color .1s}
+.choice,.tile{display:flex;align-items:center;gap:12px;text-align:left;width:100%;border:2px solid var(--line);border-radius:14px;background:var(--card);padding:13px 16px;
+  box-shadow:0 3px 0 var(--line);font-size:16px;line-height:1.45;min-height:56px;transition:background .1s,border-color .1s}
 .choice:hover:not(:disabled),.tile:hover:not(:disabled){background:var(--soft)}
 .kbd{flex:none;display:inline-grid;place-items:center;width:26px;height:26px;border:2px solid var(--line);border-radius:8px;font-size:13px;font-weight:800;color:var(--muted)}
 .sel{border-color:var(--blue)!important;background:var(--sel-bg)!important;box-shadow:0 3px 0 var(--blue)!important}
@@ -135,7 +155,7 @@ code{background:var(--soft);border-radius:6px;padding:1px 5px;font-size:.92em}
 .wrong{border-color:var(--red)!important;background:var(--bad-bg)!important;box-shadow:0 3px 0 var(--red)!important}
 .tf{grid-template-columns:1fr 1fr}
 .tf .choice{justify-content:center;font-weight:800;font-size:18px;min-height:64px}
-.statement{border:2px solid var(--line);border-radius:16px;padding:16px;font-size:19px;font-weight:700;margin-bottom:18px;background:var(--soft)}
+.statement{border:2px solid var(--line);border-radius:16px;padding:16px;font-size:18px;font-weight:700;line-height:1.5;margin-bottom:18px;background:var(--soft)}
 .match{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .match .col{display:grid;gap:10px;align-content:start}
 .tile{font-size:15px}
@@ -208,8 +228,29 @@ code{background:var(--soft);border-radius:6px;padding:1px 5px;font-size:.92em}
 #scrim{position:fixed;inset:0;background:rgba(0,0,0,.25);z-index:19}
 
 .toast{position:fixed;left:50%;top:calc(76px + env(safe-area-inset-top,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-weight:700;font-size:14px;z-index:30;box-shadow:var(--shadow)}
+/* ---------- bottom sheet (reference / notes) ---------- */
+#sheet-scrim{position:fixed;inset:0;z-index:15;background:rgba(0,0,0,.35)}
+.sheet{position:fixed;left:0;right:0;bottom:0;margin:0 auto;max-width:680px;z-index:16;max-height:84vh;display:flex;flex-direction:column;background:var(--bg);border-radius:22px 22px 0 0;box-shadow:var(--shadow);padding-bottom:env(safe-area-inset-bottom,0px);animation:sheetup .22s ease-out}
+.sheet .grip{width:42px;height:5px;border-radius:9px;background:var(--line);margin:8px auto 0;flex:none}
+.sheet header{display:flex;align-items:center;gap:8px;padding:4px 8px 10px 18px;border-bottom:2px solid var(--line);flex:none}
+.sheet header h2{flex:1;min-width:0;margin:0;font-size:17px;line-height:1.3}
+.sheet .sbody{overflow-y:auto;padding:16px 18px 28px;font-size:16px;line-height:1.65;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+.sheet .sbody p{margin:0 0 12px}
+.sheet .sbody ul{margin:0 0 12px;padding-left:22px}
+.sheet .note{padding:0 0 6px;margin:0 0 16px;border-bottom:2px solid var(--line)}
+.sheet .note:last-child{border-bottom:0;margin-bottom:0}
+.sheet .note h3{margin:0 0 6px;font-size:17px}
+.sheet .empty{color:var(--muted)}
+.sheet .iconbtn{min-width:44px;min-height:44px}
+@keyframes sheetup{from{transform:translateY(40px);opacity:.4}}
+.lessonbtn{min-width:44px;min-height:44px;display:inline-grid;place-items:center;border:2px solid var(--line);background:var(--card);border-radius:12px;font-size:18px;box-shadow:0 3px 0 var(--line);padding:0 8px}
+@media (prefers-reduced-motion:reduce){.sheet{animation:none}.node .start{animation:none}}
+@media (hover:none) and (pointer:coarse){.kbd,.kbdhint{display:none!important}}
 @media (max-width:480px){
   .prompt{font-size:19px}
+  .top .wrap{gap:8px}
+  .lcard{padding:16px 16px 4px}
+  .code pre{font-size:13px}
   .match .tile{font-size:14px;padding:10px}
   .tutorbtn span{display:none}
 }
@@ -288,6 +329,68 @@ function fmtNum(x) {
   const a = Math.abs(x);
   if (a !== 0 && (a >= 1e9 || a < 1e-4)) return x.toExponential(4).replace(/\.?0+e/, 'e');
   return Number(x.toPrecision(7)).toLocaleString('en-US', { maximumFractionDigits: 6 });
+}
+const PY_KW = new Set('def return for in if else elif while import as from and or not is None True False lambda with class try except finally pass break continue yield print'.split(' '));
+function highlight(src) {
+  const re = /(#[^\n]*)|([rbfu]?"(?:[^"\\\n]|\\.)*"|[rbfu]?'(?:[^'\\\n]|\\.)*')|\b(\d+(?:\.\d+)?)\b|\b([A-Za-z_]\w*)\b/g;
+  let out = '', last = 0, m;
+  src = String(src);
+  while ((m = re.exec(src))) {
+    out += esc(src.slice(last, m.index));
+    if (m[1]) out += '<span class="c">' + esc(m[1]) + '</span>';
+    else if (m[2]) out += '<span class="s">' + esc(m[2]) + '</span>';
+    else if (m[3]) out += '<span class="n">' + esc(m[3]) + '</span>';
+    else out += PY_KW.has(m[4]) ? '<span class="k">' + esc(m[4]) + '</span>' : esc(m[4]);
+    last = re.lastIndex;
+  }
+  return out + esc(src.slice(last));
+}
+function codeBlock(src, out, cap) {
+  return h('div', { class: 'code' + (out ? ' out' : '') },
+    h('span', { class: 'cap' }, cap || (out ? '输出 OUTPUT' : 'PYTHON')),
+    h('pre', { html: out ? esc(src) : highlight(src) }));
+}
+function termsBox(terms) {
+  return h('div', { class: 'terms' }, h('span', { class: 'cap' }, '术语 TERMS'),
+    terms.map(([zh, en]) => h('div', { class: 'tr' }, h('span', { html: inline(zh) }), h('span', { class: 'en' }, en))));
+}
+// The blocks any step may carry besides its main text, in reading order.
+function extras(s, opts = {}) {
+  const out = [];
+  if (s.code) out.push(codeBlock(s.code, false, s.codeCaption));
+  if (s.output) out.push(codeBlock(s.output, true));
+  if (s.equation) out.push(h('div', { class: 'eq' }, s.equation));
+  if (s.terms && s.terms.length) out.push(termsBox(s.terms));
+  if (s.flag && !opts.noFlag) out.push(flagBox(s.flag));
+  return out;
+}
+const refList = s => !s.ref ? [] : Array.isArray(s.ref) ? s.ref : [s.ref];
+function refButtons(s) {
+  const refs = refList(s);
+  if (!refs.length) return null;
+  return h('div', { class: 'refs' }, refs.map((r, i) => h('button', { class: 'refbtn', type: 'button', 'data-ref': i, onclick: () => openRef(r) },
+    h('span', { class: 'i', 'aria-hidden': 'true' }, 'i'), h('span', { html: inline(r.title || '查看资料') }))));
+}
+let sheetReturn = null;
+function openSheet(title, content) {
+  closeSheet();
+  sheetReturn = document.activeElement;
+  const close = h('button', { class: 'iconbtn', id: 'sheet-close', 'aria-label': '关闭', onclick: closeSheet }, '✕');
+  const box = h('div', { class: 'sheet', id: 'sheet', role: 'dialog', 'aria-modal': 'true', 'aria-label': plain(title) },
+    h('div', { class: 'grip', 'aria-hidden': 'true' }),
+    h('header', null, h('h2', { html: inline(title) }), close),
+    h('div', { class: 'sbody' }, content));
+  document.body.append(h('div', { id: 'sheet-scrim', onclick: closeSheet }), box);
+  close.focus();
+}
+function closeSheet() {
+  const a = $('#sheet'), b = $('#sheet-scrim');
+  if (a) a.remove(); if (b) b.remove();
+  if (sheetReturn && sheetReturn.focus && document.contains(sheetReturn)) sheetReturn.focus();
+  sheetReturn = null;
+}
+function openRef(r) {
+  openSheet(r.title || '参考资料', [r.body ? h('div', { html: md(r.body) }) : null, ...extras(r)]);
 }
 function toast(msg) {
   const t = h('div', { class: 'toast', role: 'status' }, msg);
@@ -419,7 +522,7 @@ function openPicker() {
 function closePicker() { const a = $('#picker'), b = $('#picker-scrim'); if (a) a.remove(); if (b) b.remove(); }
 
 function renderHome() {
-  closePicker();
+  closePicker(); closeSheet();
   cur = null; setPrimary(null); app.innerHTML = ''; document.body.dataset.screen = 'home';
   window.scrollTo(0, 0);
   app.append(topBar(
@@ -481,7 +584,7 @@ function renderHome() {
     S = fresh(); await clearState(); await save(); renderHome(); toast('进度已重置');
   });
   const where = storeMode === 'artifact' ? '进度保存在 Claude 里。' : storeMode === 'local' ? '进度保存在这台设备的浏览器里。' : '这里无法保存进度（浏览器禁止了存储）。';
-  w.append(h('div', { class: 'foot' }, rb, h('p', null, where), h('p', null, '键盘：1–9 选择 · Enter 检查 / 继续 · Esc 关闭弹窗')));
+  w.append(h('div', { class: 'foot' }, rb, h('p', null, where), h('p', { class: 'kbdhint' }, '键盘：1–9 选择 · Enter 检查 / 继续 · Esc 关闭弹窗')));
   if (!ss && nextL) setPrimary({ click: () => startLesson(nextL.l.id), disabled: false });
   tutorSync();
 }
@@ -509,10 +612,24 @@ function lessonTop() {
     h('div', { class: 'progress', role: 'progressbar', 'aria-valuenow': pct, 'aria-valuemin': 0, 'aria-valuemax': 100 }, h('i', { style: `width:${pct}%` })),
     ss.combo >= 2 ? h('span', { class: 'chip combo', title: '连击' }, '🔥', String(ss.combo)) : null,
     h('span', { class: 'chip hearts', id: 'hearts', title: '红心' }, '❤️ ', String(ss.hearts)),
+    h('button', { class: 'lessonbtn', id: 'notes-btn', 'aria-label': '本关笔记：回看前面的知识卡', title: '本关笔记', onclick: openNotes }, '📖'),
     tutorButton());
+}
+function openNotes() {
+  if (!cur) return;
+  const ent = STEPS.get(cur.key);
+  const steps = cur.L.l.steps;
+  // In a lesson show the cards already passed (and the current one); in review show the whole lesson.
+  const upto = S.session && S.session.mode === 'lesson' ? ent.si : steps.length - 1;
+  const cards = steps.slice(0, upto + 1).filter(x => x.type === 'card');
+  const list = cards.length ? cards.map(c => h('section', { class: 'note' },
+      c.title ? h('h3', null, c.title) : null, h('div', { html: md(c.body) }), ...extras(c)))
+    : [h('p', { class: 'empty' }, '这一关前面还没有知识卡。')];
+  openSheet('📖 本关笔记 · ' + cur.L.l.title, list);
 }
 
 function renderStep() {
+  closeSheet();
   const ss = S.session;
   if (!ss) return renderHome();
   if (ss.hearts <= 0) return renderOut();
@@ -534,9 +651,8 @@ function renderStep() {
     stage.append(h('div', { class: 'kind' }, ss.mode === 'review' ? '复习' : `第 ${ent.L.ui + 1} 单元 · ${ent.L.l.title}`));
     const card = h('article', { class: 'lcard' });
     if (s.title) card.append(h('h2', null, s.title));
-    card.append(h('div', { html: md(s.body) }));
-    if (s.equation) card.append(h('div', { class: 'eq' }, s.equation));
-    if (s.flag) card.append(flagBox(s.flag));
+    card.append(h('div', { html: md(s.body) }), ...extras(s));
+    const rb = refButtons(s); if (rb) card.append(rb);
     stage.append(card);
     const b = h('button', { class: 'btn wide', id: 'primary', onclick: () => { ss.pos++; save(); renderStep(); } }, '继续');
     barIn.append(b); setPrimary(b);
@@ -545,6 +661,12 @@ function renderStep() {
     const b = h('button', { class: 'btn wide', id: 'primary', disabled: true, onclick: check }, '检查');
     const onChange = () => { b.disabled = !cur.ex.ready(); };
     cur.ex = EX[s.type](s, stage, onChange);
+    const ctxEls = extras(s), rb = refButtons(s);
+    if (ctxEls.length || rb) {
+      const ctxBox = h('div', { class: 'ctx' }, ctxEls, rb);
+      const p = stage.querySelector('.prompt');
+      if (p) p.after(ctxBox); else stage.prepend(ctxBox);
+    }
     barIn.append(b); setPrimary(b);
   }
   tutorSync();
@@ -584,7 +706,7 @@ function check() {
   const fb = h('div', { class: 'fb', id: 'feedback', 'aria-live': 'polite' });
   fb.append(h('h3', null, r.ok ? (ss.combo >= 3 ? `🔥 连击 ×${ss.combo}！` : pick(['答对了！', '漂亮！', '完全正确！', '好样的！'])) : '差一点',
     r.ok ? h('span', { class: 'xp' }, `+${gained} XP${bonus ? `（连击 +${bonus}）` : ''}`) : null));
-  if (!r.ok) fb.append(h('p', { class: 'ans' }, '正确答案：', r.correct));
+  if (!r.ok) fb.append(h('p', { class: 'ans', html: '正确答案：' + inline(r.correct) }));
   if (!r.ok && r.why) fb.append(h('p', { html: '<b>为什么不选它：</b>' + inline(r.why) }));
   if (s.explain) fb.append(h('p', { html: inline(s.explain) }));
   if (!r.ok && ss.hearts > 0 && ss.requeued.includes(cur.key) && ss.queue.lastIndexOf(cur.key) > ss.pos - 1) fb.append(h('p', { style: 'opacity:.8;font-size:13px' }, '这题在本关结束前还会再出现一次。'));
@@ -714,7 +836,7 @@ const EX = {
     root.append(h('div', { class: 'prompt', html: inline(s.prompt || '按正确顺序排列') }));
     const seqEl = h('div', { class: 'seq', id: 'seq' });
     const bankBtns = bank.map((ii, bi) => h('button', { class: 'tile', 'data-item': ii, onclick: () => add(bi) }, h('span', { class: 'kbd' }, String(bi + 1)), h('span', { html: inline(s.items[ii]) })));
-    root.append(seqEl, h('div', { class: 'bank' }, bankBtns), h('div', { class: 'hint' }, '点击加入 · 点已放好的项可以移除 · Backspace 撤销'));
+    root.append(seqEl, h('div', { class: 'bank' }, bankBtns), h('div', { class: 'hint' }, '按顺序点击加入 · 点已放好的项可以拿回来', h('span', { class: 'kbdhint' }, ' · Backspace 撤销')));
     function paint(result) {
       seqEl.innerHTML = '';
       if (!seq.length) seqEl.append(h('span', { class: 'ph' }, '按顺序点击下面的选项'));
@@ -772,6 +894,7 @@ document.addEventListener('keydown', e => {
   if (e.metaKey || e.ctrlKey || e.altKey) return;
   const t = e.target;
   if (t.closest && t.closest('#tutor')) { if (e.key === 'Escape') closeTutor(); return; }
+  if ($('#sheet')) { if (e.key === 'Escape') { e.preventDefault(); closeSheet(); } return; }
   if (e.key === 'Escape') { if ($('#picker')) closePicker(); else if (T.open) closeTutor(); return; }
   if ($('#picker')) return;
   if (T.open) return;
@@ -817,6 +940,9 @@ function describeItem(ctx) {
     lines.push('ITEM: lesson card', 'Title: ' + (s.title || ''), 'Text: ' + plain(s.body));
     if (s.equation) lines.push('Equation: ' + s.equation);
   } else {
+    if (s.code) lines.push('Code shown with the question:\n' + s.code);
+    if (s.output) lines.push('Output shown with the question:\n' + s.output);
+    refList(s).forEach(r => lines.push(`Reference the learner can open ("${plain(r.title || '')}"):\n` + [plain(r.body || ''), r.code || '', r.output ? 'Output:\n' + r.output : ''].filter(Boolean).join('\n')));
     lines.push('ITEM: ' + TYPE_LABEL[s.type] + ' exercise', cur.ex.view());
     if (ctx.phase === 'unanswered') {
       lines.push('STATUS: NOT ANSWERED YET. The correct answer is deliberately withheld from you. Hints only.');
@@ -831,8 +957,8 @@ function describeItem(ctx) {
 }
 function lessonNotes() {
   if (!cur) return '';
-  let txt = cur.L.l.steps.filter(x => x.type === 'card').map(c => `## ${c.title || ''}\n${plain(c.body)}${c.equation ? '\nEquation: ' + c.equation : ''}${c.flag ? '\nCaveat: ' + plain(typeof c.flag === 'object' ? c.flag.text : c.flag) : ''}`).join('\n\n');
-  if (txt.length > 3500) txt = txt.slice(0, 3500) + '…';
+  let txt = cur.L.l.steps.filter(x => x.type === 'card').map(c => `## ${c.title || ''}\n${plain(c.body)}${c.code ? '\nCode:\n' + c.code : ''}${c.output ? '\nOutput:\n' + c.output : ''}${c.equation ? '\nEquation: ' + c.equation : ''}${c.flag ? '\nCaveat: ' + plain(typeof c.flag === 'object' ? c.flag.text : c.flag) : ''}`).join('\n\n');
+  if (txt.length > 6000) txt = txt.slice(0, 6000) + '…';
   return txt;
 }
 function systemPrompt(ctx) {

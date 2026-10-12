@@ -71,6 +71,19 @@ def check_flag(r, where, flag):
         r.err(where, "'flag' must be a string or {title, text}")
 
 
+def check_extras(r, where, s):
+    """Optional blocks any step (or ref) may carry: code, output, terms."""
+    for k in ("code", "output", "codeCaption"):
+        if k in s and not nonempty_str(s[k]):
+            r.err(where, f"'{k}' must be a non-empty string")
+    if "code" in s and isinstance(s["code"], str) and len(s["code"].splitlines()) > 18:
+        r.warn(where, "code block is over 18 lines — long code reads badly on a phone; move it into a 'ref'")
+    terms = s.get("terms")
+    if terms is not None and (not isinstance(terms, list) or not terms
+                              or not all(isinstance(x, list) and len(x) == 2 and all(nonempty_str(y) for y in x) for x in terms)):
+        r.err(where, "'terms' must be a list of [中文, English] string pairs")
+
+
 def check_step(r, where, s, tf_answers):
     if not isinstance(s, dict):
         r.err(where, "step must be an object")
@@ -80,6 +93,17 @@ def check_step(r, where, s, tf_answers):
         r.err(where, f"unknown type {t!r} (expected one of {sorted(STEP_TYPES)})")
         return
     check_flag(r, where, s.get("flag"))
+    check_extras(r, where, s)
+    refs = s.get("ref")
+    if refs is not None:
+        for i, ref in enumerate(refs if isinstance(refs, list) else [refs]):
+            w = f"{where}.ref[{i}]"
+            if not isinstance(ref, dict) or not nonempty_str(ref.get("title")):
+                r.err(w, "'ref' must be {title, body?, code?, output?} (or a list of them) with a non-empty title")
+                continue
+            if not any(nonempty_str(ref.get(k)) for k in ("body", "code", "output", "equation")):
+                r.err(w, "'ref' needs at least one of body / code / output")
+            check_extras(r, w, ref)
 
     if t == "card":
         if not nonempty_str(s.get("body")):

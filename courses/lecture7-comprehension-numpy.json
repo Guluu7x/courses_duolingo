@@ -1,36 +1,190 @@
 {
- "title": "列表推导式 + NumPy 闯关",
- "subtitle": "Lecture 7：列表推导式、enumerate 和 NumPy 入门，按 Python 3 与 NumPy 2.5 编写",
- "id": "lecture7-comprehension-numpy",
+ "title": "List Comprehension · enumerate · NumPy",
+ "subtitle": "Lecture 7：列表推导式（list comprehension）、enumerate 和 NumPy 入门。按 Python 3 与 NumPy 2.5 编写。做题时点 ⓘ 看讲义代码，点 📖 回看本关笔记。",
+ "id": "lecture7-list-comprehension-numpy",
  "tutor": {
   "model": "claude-sonnet-5-5",
-  "context": "This course is for a Chinese-speaking beginner (basic Python, little stats). It is built from Lecture 7 of Programming for Language Technologists (Johan Sjons): list comprehensions with and without if, loop-vs-comprehension trade-offs, enumerate, and NumPy basics (arrays, ndim/shape/size, indexing, reshape), written for NumPy 2.5. Answer in Chinese and keep code/function names in English. Flags: get_lst3 uses `word` instead of its parameter `long_word`; words[i-1] wraps to the last word when i is 0; the slide's '2x3 matrix has 2 and 3 dimensions' mixes up ndim and shape; on Windows use `py -m pip install numpy`."
+  "context": "This course is for a Chinese-speaking beginner (basic Python, little stats). It is built from Lecture 7 of Programming for Language Technologists (Johan Sjons): list comprehensions with and without if, loop-vs-comprehension trade-offs, enumerate, and NumPy basics (arrays, ndim/shape/size, indexing, multiplication, transpose, reshape), written for NumPy 2.5. Answer in Chinese, keep code/function names in English, and give the English term in parentheses after Chinese technical terms (e.g. 标量（scalar）). Flags: get_lst3 uses `word` instead of its parameter `long_word`; words[i-1] wraps to the last word when i is 0; the slide's '2x3 matrix has 2 and 3 dimensions' mixes up ndim and shape; the slide's 'Transform' topic is taught as transpose; the conditional-expression lesson goes beyond the slides."
  },
  "units": [
   {
-   "id": "u1",
-   "title": "列表推导式",
-   "description": "Lecture 7：把“建空列表 + for + append”写成一行。",
+   "title": "列表推导式（list comprehension）",
+   "description": "把“空列表 + for 循环 + append”写成一行。",
    "lessons": [
     {
-     "id": "u1-l1",
-     "title": "从 for 循环到一行",
+     "title": "先复习：用 for 循环造列表",
      "steps": [
       {
        "type": "card",
-       "title": "老办法：空列表 + append",
-       "body": "想把一个单词拆成字母列表，常见写法是：\n\n- 先建空列表 `chars = []`\n- `for char in long_word:` 逐个取字母\n- `chars.append(char)` 放进列表\n\n三步走，写了好几行。",
-       "equation": "chars = []\nfor char in long_word:\n    chars.append(char)"
+       "title": "这一单元学什么",
+       "body": "讲义第 2 部分讲**列表推导式（list comprehension）**：一种用一行代码生成**列表（list）**的写法。\n\n先复习它要替代的老写法，再学新写法。\n\n全单元都用一个例子：把单词拆成一个个字母，比如 `\"cat\"` 变成 `['c', 'a', 't']`。",
+       "terms": [
+        [
+         "列表推导式",
+         "list comprehension"
+        ],
+        [
+         "列表",
+         "list"
+        ],
+        [
+         "元素",
+         "element / item"
+        ]
+       ]
       },
       {
        "type": "card",
-       "title": "新写法：列表推导式",
-       "body": "同样的事，一行写完：\n\n方括号里先写**每个元素长什么样**，再写 `for` 从哪里取。\n\n读法：“对 long_word 里的每个 char，放 char 进列表。”",
-       "equation": "chars = [char for char in long_word]"
+       "title": "老写法：空列表 + for + append",
+       "body": "讲义的 `get_lst1` 分三步：\n\n- `chars = []`：先建一个**空列表（empty list）**\n- `for char in long_word:`：用**循环（loop）**依次取出每个字母\n- `chars.append(char)`：用 **append** 把字母加到列表末尾\n\n最后 `return chars` 把结果**返回（return）**给调用它的地方。",
+       "code": "def get_lst1(long_word):\n    chars = []\n    for char in long_word:\n        chars.append(char)\n    return chars",
+       "terms": [
+        [
+         "参数",
+         "parameter（这里是 long_word）"
+        ],
+        [
+         "循环",
+         "for loop"
+        ],
+        [
+         "追加到末尾",
+         "append"
+        ],
+        [
+         "返回",
+         "return"
+        ]
+       ]
+      },
+      {
+       "type": "card",
+       "title": "一步一步看它怎么跑",
+       "body": "**字符串（string）**可以直接放进 for 循环，每次取出一个**字符（character）**。\n\n调用 `get_lst1(\"cat\")` 时，列表这样慢慢长大：",
+       "equation": "开始         chars = []\nchar = 'c'   chars = ['c']\nchar = 'a'   chars = ['c', 'a']\nchar = 't'   chars = ['c', 'a', 't']",
+       "terms": [
+        [
+         "字符串",
+         "string (str)"
+        ],
+        [
+         "字符",
+         "character"
+        ]
+       ]
       },
       {
        "type": "mcq",
-       "prompt": "`[n * n for n in range(5)]` 的结果是什么？",
+       "prompt": "这段代码会打印什么？",
+       "options": [
+        "`['d', 'o', 'g']`",
+        "`'dog'`",
+        "`['dog']`",
+        "`['g', 'o', 'd']`"
+       ],
+       "answer": 0,
+       "why": [
+        "",
+        "append 把每个字母放进列表，返回的是列表，不是字符串。",
+        "循环是一个字母一个字母取的，不是把整个单词放进去。",
+        "append 加在末尾，顺序和原单词一样。"
+       ],
+       "explain": "循环三次，每次把一个字母 append 到末尾。",
+       "code": "def get_lst1(long_word):\n    chars = []\n    for char in long_word:\n        chars.append(char)\n    return chars\n\nprint(get_lst1(\"dog\"))"
+      },
+      {
+       "type": "tf",
+       "statement": "把 `chars = []` 挪进 for 循环里（如下），`get_lst1(\"dog\")` 仍然返回 `['d', 'o', 'g']`。",
+       "answer": false,
+       "explain": "每转一圈列表都被清空重来，最后只剩 `['g']`。空列表必须在循环**之前**建好。",
+       "code": "def get_lst1(long_word):\n    for char in long_word:\n        chars = []\n        chars.append(char)\n    return chars"
+      },
+      {
+       "type": "order",
+       "prompt": "把 `get_lst1` 的四行按正确顺序排好：",
+       "items": [
+        "`chars = []`",
+        "`for char in long_word:`",
+        "`chars.append(char)`",
+        "`return chars`"
+       ],
+       "explain": "先准备容器，再循环往里放，最后交出结果。`return` 在循环外面。"
+      },
+      {
+       "type": "numeric",
+       "prompt": "`get_lst1(\"banana\")` 返回的列表里有几个元素？",
+       "answer": 6,
+       "tolerance": 0.001,
+       "explain": "\"banana\" 有 6 个字母，循环 6 次，append 6 次。重复的字母也会各放一次。",
+       "unit": "个",
+       "ref": {
+        "title": "讲义：get_lst1（老写法）",
+        "code": "def get_lst1(long_word):\n    chars = []\n    for char in long_word:\n        chars.append(char)\n    return chars"
+       }
+      },
+      {
+       "type": "match",
+       "prompt": "把代码和它的作用配对。",
+       "pairs": [
+        [
+         "`[]`",
+         "一个空列表"
+        ],
+        [
+         "`for ... in ...`",
+         "逐个取出元素"
+        ],
+        [
+         "`.append(x)`",
+         "把 x 加到列表末尾"
+        ],
+        [
+         "`return`",
+         "把结果交回给调用者"
+        ]
+       ],
+       "explain": "这四样就是老写法的全部零件。下一关会把它们压成一行。"
+      }
+     ]
+    },
+    {
+     "title": "一行写完：列表推导式",
+     "steps": [
+      {
+       "type": "card",
+       "title": "同一件事，一行写完",
+       "body": "讲义的 `get_lst2` 和 `get_lst1` 结果完全一样。\n\n方括号 `[ ]` 里直接写两件事：**放什么**进列表，和**从哪里取**。不需要空列表，也不需要 append。\n\n读法：“对 long_word 里的每个 char，把 char 放进列表。”",
+       "code": "def get_lst2(long_word):\n    chars = [char for char in long_word]\n    return chars"
+      },
+      {
+       "type": "card",
+       "title": "推导式的三个部分",
+       "body": "- **表达式（expression）**：每个元素最终长什么样，写在最前面\n- **循环变量（loop variable）**：每次取出的那一个\n- **可迭代对象（iterable）**：能被一个个取出的东西，比如字符串、列表、`range(...)`",
+       "equation": "[ char for char in long_word ]\n\nchar          → 表达式 expression\nfor char      → 循环变量 loop variable\nin long_word  → 可迭代对象 iterable",
+       "terms": [
+        [
+         "表达式",
+         "expression"
+        ],
+        [
+         "循环变量",
+         "loop variable"
+        ],
+        [
+         "可迭代对象",
+         "iterable"
+        ]
+       ]
+      },
+      {
+       "type": "card",
+       "title": "对照：老写法怎么变成新写法",
+       "body": "- append 括号里的东西（`char`）→ 搬到方括号**最前面**\n- for 那一行 → 原样搬到后面，去掉冒号\n- 空列表和 append → 不要了",
+       "code": "# 老写法\nchars = []\nfor char in long_word:\n    chars.append(char)\n\n# 新写法\nchars = [char for char in long_word]"
+      },
+      {
+       "type": "mcq",
+       "prompt": "`[n * n for n in range(5)]` 的结果是什么？（`range(5)` 依次给出 0, 1, 2, 3, 4）",
        "options": [
         "`[0, 1, 4, 9, 16]`",
         "`[1, 4, 9, 16, 25]`",
@@ -40,110 +194,342 @@
        "answer": 0,
        "why": [
         "",
-        "`range(5)` 从 0 开始，到 4 结束，不含 5。",
-        "前面的 `n * n` 才是放进列表的东西，不是 n 本身。",
+        "`range(5)` 从 0 开始，到 4 结束，不包括 5。",
+        "放进列表的是最前面的 `n * n`，不是 n 本身。",
         "`n * n` 是平方，不是乘 2。"
        ],
-       "explain": "`range(5)` 给出 0–4，每个数平方后放进列表。"
-      },
-      {
-       "type": "order",
-       "prompt": "按列表推导式的书写顺序排好这些部分：",
-       "items": [
-        "`[`",
-        "`char.upper()`（每个元素长什么样）",
-        "`for char in word`（从哪里取）",
-        "`]`"
-       ],
-       "explain": "先写结果表达式，再写 for。和普通 for 循环“先 for 后 append”的顺序正好相反。"
-      },
-      {
-       "type": "card",
-       "title": "讲义里藏着一个 bug",
-       "body": "讲义第 8 页的 `get_lst3`：参数叫 `long_word`，方括号里却写成了 `word`。\n\n函数会去外面找一个叫 `word` 的变量。找不到就报 `NameError`。",
-       "equation": "def get_lst3(long_word):\n    return [char for char in word]   # ← 应为 long_word",
-       "flag": {
-        "title": "Source correction",
-        "text": "讲义写的是 `for char in word`，应改成 `for char in long_word`。更危险的是：如果文件里恰好有一个全局变量 `word`，函数不报错，却悄悄拆了错误的单词。"
-       }
+       "explain": "每个 n 先算 `n * n`，再放进列表。"
       },
       {
        "type": "mcq",
-       "prompt": "脚本里前面写过 `word = \"strings\"`。调用 `get_lst3(\"Kafka\")`（有 bug 的版本）会怎样？",
+       "prompt": "`.upper()` 把字符串变成大写。下面的推导式结果是什么？",
        "options": [
-        "返回 `['s', 't', 'r', 'i', 'n', 'g', 's']`",
-        "返回 `['K', 'a', 'f', 'k', 'a']`",
-        "报 `NameError`",
-        "报 `SyntaxError`"
+        "`['HI', 'OK']`",
+        "`'HIOK'`",
+        "`['HI']`",
+        "`['H', 'I', 'O', 'K']`"
        ],
        "answer": 0,
        "why": [
         "",
-        "传进去的 \"Kafka\" 存在 `long_word` 里，可函数根本没用它。",
-        "全局变量 `word` 存在，所以能找到，不会报错。",
-        "语法完全正确，错在用错了变量名。"
+        "列表推导式的结果总是列表，不会自动拼成一个字符串。",
+        "表达式会作用到**每个**元素上，不只第一个。",
+        "循环的是列表里的单词，不是单词里的字母。"
        ],
-       "explain": "函数内部找不到 `word` 时会用外面的全局 `word`。没报错不等于对。"
+       "explain": "循环变量 w 依次是 \"hi\" 和 \"ok\"，各自变大写后放进新列表。",
+       "code": "[w.upper() for w in [\"hi\", \"ok\"]]"
+      },
+      {
+       "type": "order",
+       "prompt": "按书写顺序排好这个推导式的四个部分：`[char.upper() for char in word]`",
+       "items": [
+        "`[`",
+        "`char.upper()`（放什么）",
+        "`for char in word`（从哪里取）",
+        "`]`"
+       ],
+       "explain": "先写结果表达式，再写 for。和老写法“先 for 后 append”的顺序正好相反。"
+      },
+      {
+       "type": "card",
+       "title": "表达式可以是任何计算",
+       "body": "最前面不一定只是循环变量本身。它可以是任何**表达式**：调用函数、做运算、拼字符串都行。\n\n下面用 `len()` 算出每个词的长度（length）：",
+       "code": "words = [\"this\", \"is\", \"a\", \"list\", \"of\", \"strings\"]\nprint([len(w) for w in words])",
+       "output": "[4, 2, 1, 4, 2, 7]"
+      },
+      {
+       "type": "numeric",
+       "prompt": "这些长度加起来是多少？",
+       "answer": 20,
+       "tolerance": 0.001,
+       "explain": "4 + 2 + 1 + 4 + 2 + 7 = 20。也可以直接写 `sum([len(w) for w in words])`。",
+       "code": "words = [\"this\", \"is\", \"a\", \"list\", \"of\", \"strings\"]\nlengths = [len(w) for w in words]   # [4, 2, 1, 4, 2, 7]"
       },
       {
        "type": "tf",
-       "statement": "列表推导式和对应的 append 循环，得到的列表内容完全一样。",
-       "answer": true,
-       "explain": "它们只是两种写法，结果相同。推导式更短，通常也略快。"
+       "statement": "列表推导式会修改原来的列表 `words`。",
+       "answer": false,
+       "explain": "推导式总是生成一个**新**列表，原来的 `words` 不变。"
+      },
+      {
+       "type": "match",
+       "prompt": "把每个推导式和它的结果配对。",
+       "pairs": [
+        [
+         "`[c for c in \"abc\"]`",
+         "`['a', 'b', 'c']`"
+        ],
+        [
+         "`[c * 2 for c in \"abc\"]`",
+         "`['aa', 'bb', 'cc']`"
+        ],
+        [
+         "`[c + \"!\" for c in \"abc\"]`",
+         "`['a!', 'b!', 'c!']`"
+        ],
+        [
+         "`[1 for c in \"abc\"]`",
+         "`[1, 1, 1]`"
+        ]
+       ],
+       "explain": "表达式决定“放什么”。哪怕表达式里根本不用 c，也会循环 3 次、放 3 个元素。"
       }
      ]
     },
     {
-     "id": "u1-l2",
-     "title": "加上 if 来筛选",
+     "title": "找 bug：get_lst3",
      "steps": [
       {
        "type": "card",
-       "title": "带条件的老写法",
-       "body": "找出单词里的元音：循环里多一个 `if`，只有满足条件的才 append。\n\n讲义把元音定为 `\"aeiouy\"`，所以 y 也算元音。",
-       "equation": "for char in word:\n    if char in vowels:\n        lst_vowels.append(char)"
+       "title": "讲义里的 get_lst3",
+       "body": "讲义第 8 页把 return 和推导式合成一行，更短。\n\n但仔细看：**参数（parameter）**叫 `long_word`，方括号里却写的是 `word`。这两个名字对不上。",
+       "code": "def get_lst3(long_word):\n    return [char for char in word]   # ← 应为 long_word",
+       "flag": {
+        "title": "讲义更正",
+        "text": "讲义写的是 `for char in word`，应该改成 `for char in long_word`。"
+       }
       },
       {
        "type": "card",
-       "title": "把 if 放到最后",
-       "body": "推导式里，条件写在 `for` 后面：\n\n读法：“对 word 里每个 char，**如果**它在元音里，就放进去。”\n\n不满足条件的元素直接跳过。",
-       "equation": "[char for char in word if char in \"aeiouy\"]"
+       "title": "Python 怎么找一个变量",
+       "body": "函数里用到一个名字时，Python 按顺序找：\n\n- 先在**函数内部**找：**局部变量（local variable）**，包括参数\n- 找不到，再去函数外面找：**全局变量（global variable）**\n- 都找不到：报 **NameError**\n\n变量能被找到的范围叫**作用域（scope）**。",
+       "terms": [
+        [
+         "局部变量",
+         "local variable"
+        ],
+        [
+         "全局变量",
+         "global variable"
+        ],
+        [
+         "作用域",
+         "scope"
+        ],
+        [
+         "名字错误",
+         "NameError"
+        ]
+       ]
       },
       {
        "type": "mcq",
-       "prompt": "讲义最后打印 `\",\".join(get_vowels2(\"Kafka\"))`，冒号后面会显示什么？",
+       "prompt": "文件里只有这几行。运行后会怎样？",
        "options": [
-        "`a,a`",
-        "`aa`",
-        "`K,a,f,k,a`",
-        "`a`"
+        "报错：`NameError: name 'word' is not defined`",
+        "打印 `['K', 'a', 'f', 'k', 'a']`",
+        "打印 `[]`",
+        "报错：`SyntaxError`"
        ],
        "answer": 0,
        "why": [
         "",
-        "`\",\".join` 会在元素之间插入逗号。",
-        "这是没筛选的整个单词。元音只有两个 a。",
-        "两个 a 都会被保留，推导式不会去重。"
+        "传进去的 \"Kafka\" 存在 `long_word` 里，但函数根本没用它。",
+        "Python 不会把找不到的变量当成空的。",
+        "语法完全正确。错在名字找不到，这是运行时才发现的。"
        ],
-       "explain": "筛出 `['a', 'a']`，用逗号连起来就是 `a,a`。"
+       "explain": "函数内外都没有叫 `word` 的变量，所以运行到推导式时报 NameError。",
+       "code": "def get_lst3(long_word):\n    return [char for char in word]\n\nprint(get_lst3(\"Kafka\"))"
       },
       {
-       "type": "numeric",
-       "prompt": "用 `[c for c in \"Python\" if c in \"aeiouy\"]`，结果列表有几个元素？",
-       "answer": 2,
-       "tolerance": 0.001,
-       "unit": "个",
-       "explain": "y 和 o 都在 \"aeiouy\" 里，结果是 `['y', 'o']`。"
+       "type": "mcq",
+       "prompt": "这次文件前面多了一行 `word = \"strings\"`。运行后会怎样？",
+       "options": [
+        "打印 `['s', 't', 'r', 'i', 'n', 'g', 's']`",
+        "打印 `['K', 'a', 'f', 'k', 'a']`",
+        "报错：`NameError`",
+        "报错：`SyntaxError`"
+       ],
+       "answer": 0,
+       "why": [
+        "",
+        "函数没用参数 `long_word`，所以 \"Kafka\" 被忽略了。",
+        "这次外面有一个全局变量 `word`，Python 找到了它，所以不报错。",
+        "语法没有问题。"
+       ],
+       "explain": "函数内部没有 `word`，就用了外面的全局 `word`。程序不报错，却拆错了单词。",
+       "code": "word = \"strings\"\n\ndef get_lst3(long_word):\n    return [char for char in word]\n\nprint(get_lst3(\"Kafka\"))"
       },
       {
        "type": "tf",
-       "statement": "`[c for c in \"APPLE\" if c in \"aeiouy\"]` 会找到 A 和 E。",
+       "statement": "只要程序运行时没有报错（error），结果就一定是对的。",
        "answer": false,
-       "explain": "`in` 区分大小写，大写 A 不在 \"aeiouy\" 里，结果是空列表。可以先 `.lower()`。",
-       "flag": {
-        "title": "Caveat",
-        "text": "讲义的元音函数只认小写。处理真实文本时，常写 `c.lower() in \"aeiouy\"`。"
+       "explain": "上一题就是反例：没报错，结果却是错的单词。这种 bug 更难发现。"
+      },
+      {
+       "type": "mcq",
+       "prompt": "怎样修好 `get_lst3`？",
+       "options": [
+        "`return [char for char in long_word]`",
+        "`return [word for char in long_word]`",
+        "`return [char for long_word in word]`",
+        "`return [long_word for char in word]`"
+       ],
+       "answer": 0,
+       "why": [
+        "",
+        "这样每个元素都是 `word`，而 `word` 仍然找不到。",
+        "for 和 in 的两边写反了：in 后面才是被循环的对象。",
+        "这样放进去的是整个单词，而且 `word` 仍然找不到。"
+       ],
+       "explain": "in 后面要写真正传进来的参数 `long_word`。",
+       "ref": {
+        "title": "讲义：get_lst3（有 bug）",
+        "code": "def get_lst3(long_word):\n    return [char for char in word]"
        }
+      },
+      {
+       "type": "card",
+       "title": "讲义之外：还有更短的写法",
+       "body": "只是想把字符串拆成字母的话，Python 自带的 `list()` 一步就能做到：",
+       "code": "print(list(\"cat\"))\nprint([c for c in \"cat\"])",
+       "output": "['c', 'a', 't']\n['c', 'a', 't']",
+       "flag": {
+        "title": "拓展",
+        "text": "讲义用这个例子来演示推导式的语法。实际写代码时，“原样拆开”用 `list()` 更直接；需要变换或筛选时，推导式才真正有用。"
+       }
+      },
+      {
+       "type": "tf",
+       "statement": "`list(\"Kafka\")` 的结果和 `[c for c in \"Kafka\"]` 一样。",
+       "answer": true,
+       "explain": "两者都得到 `['K', 'a', 'f', 'k', 'a']`。"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "title": "带条件的推导式（if）",
+   "description": "只留下满足条件的元素，比如找出单词里的元音。",
+   "lessons": [
+    {
+     "title": "用 if 筛选元音",
+     "steps": [
+      {
+       "type": "card",
+       "title": "老写法：循环里加 if",
+       "body": "讲义的 `get_vowels1` 找出单词里的**元音（vowel）**。只有 `if` 后面的**条件（condition）**成立时，才 append。\n\n讲义把 y 也算作元音：`\"aeiouy\"`。",
+       "code": "def get_vowels1(word):\n    vowels = \"aeiouy\"\n    lst_vowels = []\n    for char in word:\n        if char in vowels:\n            lst_vowels.append(char)\n    return lst_vowels\n\nmy_word = \"Kafka\"\nprint(f\"The vowels of the word {my_word} are:\",\n      \",\".join(get_vowels1(my_word)))",
+       "output": "The vowels of the word Kafka are: a,a",
+       "terms": [
+        [
+         "元音",
+         "vowel"
+        ],
+        [
+         "条件",
+         "condition"
+        ]
+       ]
+      },
+      {
+       "type": "card",
+       "title": "`in`：检查“在不在里面”",
+       "body": "`char in vowels` 检查 char 是否出现在字符串 vowels 里。\n\n结果只有两种：`True` 或 `False`，叫**布尔值（boolean）**。\n\n注意：`in` **区分大小写（case-sensitive）**，大写 A 和小写 a 是不同的字符。",
+       "code": "print(\"a\" in \"aeiouy\")\nprint(\"k\" in \"aeiouy\")\nprint(\"A\" in \"aeiouy\")",
+       "output": "True\nFalse\nFalse",
+       "terms": [
+        [
+         "布尔值",
+         "boolean (True / False)"
+        ],
+        [
+         "区分大小写",
+         "case-sensitive"
+        ],
+        [
+         "成员检测",
+         "membership test (in)"
+        ]
+       ]
+      },
+      {
+       "type": "tf",
+       "statement": "`\"Y\" in \"aeiouy\"` 的结果是 `True`。",
+       "answer": false,
+       "explain": "`in` 区分大小写。字符串里只有小写 y，没有大写 Y。"
+      },
+      {
+       "type": "card",
+       "title": "新写法：if 放在最后",
+       "body": "推导式里，条件写在 for **后面**。\n\n读法：“对 word 里的每个 char，**如果**它在 \"aeiouy\" 里，就放进列表。”\n\n不满足条件的元素直接跳过。",
+       "code": "def get_vowels2(word):\n    return [char for char in word if char in \"aeiouy\"]\n\nmy_word = \"Kafka\"\nprint(f\"The vowels of the word {my_word} are:\",\n      \",\".join(get_vowels2(my_word)))",
+       "output": "The vowels of the word Kafka are: a,a",
+       "equation": "[ 表达式  for 变量 in 可迭代对象  if 条件 ]"
+      },
+      {
+       "type": "card",
+       "title": "`\",\".join(...)` 是什么",
+       "body": "讲义打印时用了 `\",\".join(...)`。\n\n**join** 是字符串的一个**方法（method）**：用前面那个字符串当“胶水”，把列表里的字符串连成一个字符串。胶水也叫**分隔符（separator）**。",
+       "code": "letters = [\"a\", \"b\", \"c\"]\nprint(\",\".join(letters))\nprint(\"-\".join(letters))\nprint(\"\".join(letters))",
+       "output": "a,b,c\na-b-c\nabc",
+       "terms": [
+        [
+         "方法",
+         "method"
+        ],
+        [
+         "连接",
+         "join"
+        ],
+        [
+         "分隔符",
+         "separator"
+        ]
+       ]
+      },
+      {
+       "type": "mcq",
+       "prompt": "这段代码打印的是哪一行？",
+       "options": [
+        "`The vowels of the word Kafka are: a,a`",
+        "`The vowels of the word Kafka are: ['a', 'a']`",
+        "`The vowels of the word Kafka are: a`",
+        "`The vowels of the word Kafka are: aa`"
+       ],
+       "answer": 0,
+       "why": [
+        "",
+        "join 已经把列表连成了字符串，所以不会出现方括号。",
+        "推导式不会去掉重复，两个 a 都会留下。",
+        "join 前面的胶水是逗号 `\",\"`，所以中间有逗号。"
+       ],
+       "explain": "筛出 `['a', 'a']`，再用逗号连起来就是 `a,a`。",
+       "code": "def get_vowels2(word):\n    return [char for char in word if char in \"aeiouy\"]\n\nmy_word = \"Kafka\"\nprint(f\"The vowels of the word {my_word} are:\",\n      \",\".join(get_vowels2(my_word)))"
+      },
+      {
+       "type": "numeric",
+       "prompt": "`[c for c in \"Python\" if c in \"aeiouy\"]` 的结果有几个元素？",
+       "answer": 2,
+       "tolerance": 0.001,
+       "explain": "y 和 o 都在 \"aeiouy\" 里，结果是 `['y', 'o']`。",
+       "unit": "个"
+      },
+      {
+       "type": "mcq",
+       "prompt": "`not in` 和 `in` 正好相反。这个推导式的结果是什么？",
+       "options": [
+        "`['L', 'n', 'g', 'g']`",
+        "`['a', 'u', 'a', 'e']`",
+        "`['n', 'g', 'g']`",
+        "`['L', 'n', 'g']`"
+       ],
+       "answer": 0,
+       "why": [
+        "",
+        "这是元音。`not in` 留下的是**不在**元音里的字母。",
+        "大写 L 不在 \"aeiouy\" 里，所以会被留下。",
+        "推导式不会去重，两个 g 都在。"
+       ],
+       "explain": "Language 里不是元音的字母是 L、n、g、g。",
+       "code": "[c for c in \"Language\" if c not in \"aeiouy\"]"
+      },
+      {
+       "type": "tf",
+       "statement": "`[c for c in \"APPLE\".lower() if c in \"aeiouy\"]` 能找到 a 和 e。",
+       "answer": true,
+       "explain": "`.lower()` 先把 \"APPLE\" 变成 \"apple\"，小写的 a 和 e 就能被找到了。处理真实文本时常这样写。"
       },
       {
        "type": "match",
@@ -166,79 +552,313 @@
          "说明结果是列表"
         ]
        ],
-       "explain": "结构：[结果 for 变量 in 来源 if 条件]。"
+       "explain": "完整结构：[表达式 for 变量 in 可迭代对象 if 条件]。"
+      }
+     ]
+    },
+    {
+     "title": "拓展：筛选（filter）还是变换？",
+     "steps": [
+      {
+       "type": "card",
+       "title": "两种 if，位置不同，作用也不同",
+       "body": "- if 写在**最后**：**筛选（filter）**。决定留不留，结果可能变短。\n- `A if 条件 else B` 写在**最前面**：**条件表达式（conditional expression）**。每个元素都保留，只是变成 A 或 B，长度不变。",
+       "code": "words = [\"a\", \"list\", \"of\", \"strings\"]\n\nprint([w for w in words if len(w) > 2])\nprint([\"长\" if len(w) > 2 else \"短\" for w in words])",
+       "output": "['list', 'strings']\n['短', '长', '短', '长']",
+       "terms": [
+        [
+         "筛选",
+         "filter"
+        ],
+        [
+         "条件表达式",
+         "conditional expression"
+        ]
+       ],
+       "flag": {
+        "title": "讲义之外",
+        "text": "讲义只讲了放在最后的 if。条件表达式在作业和别人的代码里很常见，所以这里补上。"
+       }
+      },
+      {
+       "type": "tf",
+       "statement": "if 写在最后时，结果列表一定和原列表一样长。",
+       "answer": false,
+       "explain": "写在最后的 if 是筛选，不满足条件的会被扔掉，结果可能更短。"
+      },
+      {
+       "type": "mcq",
+       "prompt": "这个推导式的结果有几个元素？",
+       "options": [
+        "4 个，和 words 一样多",
+        "2 个，只有长单词",
+        "2 个，只有短单词",
+        "报错"
+       ],
+       "answer": 0,
+       "why": [
+        "",
+        "条件表达式在最前面，每个元素都会变成“长”或“短”，一个都不少。",
+        "把“长”的那些留下来是筛选的写法，if 要放在最后。",
+        "`A if 条件 else B` 放在最前面是合法写法。"
+       ],
+       "explain": "条件表达式不筛选，只决定每个位置放什么。",
+       "code": "words = [\"a\", \"list\", \"of\", \"strings\"]\n[\"长\" if len(w) > 2 else \"短\" for w in words]"
+      },
+      {
+       "type": "card",
+       "title": "常见报错：else 放错位置",
+       "body": "筛选用的 if 后面**不能**跟 else。想要 else，就把整个 `A if 条件 else B` 挪到最前面。",
+       "code": "# ✗ SyntaxError\n[w for w in words if len(w) > 2 else \"短\"]\n\n# ✓ 正确\n[w if len(w) > 2 else \"短\" for w in words]"
+      },
+      {
+       "type": "mcq",
+       "prompt": "下面哪一个是合法的写法？",
+       "options": [
+        "`[w.upper() if len(w) > 2 else w for w in words]`",
+        "`[w.upper() for w in words if len(w) > 2 else w]`",
+        "`[if len(w) > 2 w for w in words]`",
+        "`[w for w in words else w.upper()]`"
+       ],
+       "answer": 0,
+       "why": [
+        "",
+        "筛选的 if 后面不能跟 else，会报 SyntaxError。",
+        "if 不能写在最开头，前面必须先有表达式。",
+        "推导式里没有单独的 else 位置。"
+       ],
+       "explain": "带 else 的条件表达式整个放在 for 前面。"
+      },
+      {
+       "type": "numeric",
+       "prompt": "下面的结果有几个元素？",
+       "answer": 3,
+       "tolerance": 0.001,
+       "explain": "长度 ≥ 3 的是 love、NLP、lot，一共 3 个。",
+       "unit": "个",
+       "code": "[w for w in [\"I\", \"love\", \"NLP\", \"a\", \"lot\"] if len(w) >= 3]"
+      },
+      {
+       "type": "tf",
+       "statement": "下面的推导式结果是 `['K', 'x', 'f', 'k', 'x']`。",
+       "answer": true,
+       "explain": "元音 a 被换成 x，其他字母原样保留，长度不变。",
+       "code": "[\"x\" if c in \"aeiouy\" else c for c in \"Kafka\"]"
       }
      ]
     }
    ]
   },
   {
-   "id": "u2",
    "title": "推导式一定更好吗？",
-   "description": "行数少 ≠ 更好：要看循环几次、好不好读。",
+   "description": "行数少不等于更好：还要看循环几次、好不好读。",
    "lessons": [
     {
-     "id": "u2-l1",
-     "title": "偶数和奇数",
+     "title": "取余 % 和两种写法",
      "steps": [
       {
        "type": "card",
-       "title": "一次循环，分进两个篮子",
-       "body": "`get_even_and_odd_1` 只循环**一次**：\n\n- `n % 2 == 0`（除以 2 余数为 0）→ 偶数\n- 否则 → 奇数\n\n每个数只检查一遍。",
-       "equation": "[1,2,3,4,5]  →  even=[2,4]  odd=[1,3,5]"
-      },
-      {
-       "type": "card",
-       "title": "两行推导式，循环两次",
-       "body": "`get_even_and_odd_2` 写了两行推导式。代码更短，但列表被**从头到尾走了两遍**：一遍挑偶数，一遍挑奇数。",
-       "equation": "even = [n for n in numbers if n % 2 == 0]\nodd  = [n for n in numbers if n % 2 != 0]"
+       "title": "取余运算符 %",
+       "body": "`%` 是**取余运算符（modulo operator）**：算除法之后的**余数（remainder）**。\n\n- **偶数（even）**：`n % 2 == 0`\n- **奇数（odd）**：`n % 2 != 0`\n\n`==` 是“等于”，`!=` 是“不等于”。",
+       "code": "print(7 % 2)\nprint(8 % 2)\nprint(10 % 3)",
+       "output": "1\n0\n1",
+       "terms": [
+        [
+         "取余运算符",
+         "modulo operator (%)"
+        ],
+        [
+         "余数",
+         "remainder"
+        ],
+        [
+         "偶数 / 奇数",
+         "even / odd"
+        ],
+        [
+         "不等于",
+         "!= (not equal)"
+        ]
+       ]
       },
       {
        "type": "numeric",
-       "prompt": "`numbers` 有 5 个数。用两行推导式的版本，一共要做几次 `n % 2` 的判断？",
-       "answer": 10,
+       "prompt": "`17 % 5` 的结果是多少？",
+       "answer": 2,
        "tolerance": 0.001,
-       "unit": "次",
-       "explain": "每行推导式检查 5 个数，两行就是 5 × 2 = 10 次。一次循环的版本只要 5 次。"
+       "explain": "17 = 5 × 3 + 2，余数是 2。"
+      },
+      {
+       "type": "tf",
+       "statement": "对整数来说，`n % 2 == 1` 和 `n % 2 != 0` 都能用来判断奇数。",
+       "answer": true,
+       "explain": "整数除以 2 的余数只有 0 和 1 两种，所以“不等于 0”就是“等于 1”。"
       },
       {
        "type": "card",
-       "title": "讲义的第一版更慢",
-       "body": "讲义第 11 页的奇数写法是 `n not in even`。\n\n`not in` 要把 `even` 列表**从头翻一遍**才知道在不在。数字越多，越慢。第 13 页改成 `n % 2 != 0`，只算一次余数。",
-       "flag": {
-        "title": "Caveat",
-        "text": "两版结果相同（数字不重复时）。但 `n not in even` 的总工作量随列表长度平方增长；`n % 2 != 0` 是更好的写法。"
-       }
+       "title": "写法一：一次循环，分进两个篮子",
+       "body": "讲义的 `get_even_and_odd_1` 只循环一次。每个数只检查一遍：偶数放 even，否则（else）放 odd。\n\n`return even, odd` 一次返回两个列表。Python 会把它们打包成一个**元组（tuple）**，用圆括号表示。",
+       "code": "def get_even_and_odd_1(numbers):\n    even = []\n    odd = []\n    for n in numbers:\n        if n % 2 == 0:\n            even.append(n)\n        else:\n            odd.append(n)\n    return even, odd",
+       "terms": [
+        [
+         "元组",
+         "tuple"
+        ]
+       ]
+      },
+      {
+       "type": "card",
+       "title": "写法二：两行推导式",
+       "body": "代码更短，但列表被**从头到尾走了两遍**：一遍挑偶数，一遍挑奇数。\n\n`if __name__ == \"__main__\":` 的意思是：只有直接运行这个文件时，才执行下面的代码。",
+       "code": "def get_even_and_odd_2(numbers):\n    even = [n for n in numbers if n % 2 == 0]\n    odd = [n for n in numbers if n % 2 != 0]\n    return even, odd\n\nif __name__ == \"__main__\":\n    print(get_even_and_odd_2([1, 2, 3, 4, 5]))",
+       "output": "([2, 4], [1, 3, 5])"
       },
       {
        "type": "mcq",
-       "prompt": "为什么第 13 页把 `n not in even` 改成 `n % 2 != 0`？",
+       "prompt": "这段代码打印什么？",
        "options": [
-        "算余数一步完成，不用翻整个列表",
-        "`not in` 是语法错误",
-        "`n not in even` 结果是错的",
-        "`!=` 让列表推导式只循环一次"
+        "`([2, 4], [1, 3, 5])`",
+        "`[2, 4, 1, 3, 5]`",
+        "`([1, 3, 5], [2, 4])`",
+        "`[[2, 4], [1, 3, 5]]`"
        ],
        "answer": 0,
        "why": [
         "",
-        "`not in` 是合法写法，能运行。",
-        "对 [1,2,3,4,5] 两版结果一样。",
+        "两个列表是分开返回的，不会合并成一个。",
+        "return 的顺序是先 even 后 odd。",
+        "`return a, b` 得到的是元组（圆括号），不是列表。"
+       ],
+       "explain": "even 是 [2, 4]，odd 是 [1, 3, 5]，一起装进元组返回。",
+       "code": "def get_even_and_odd_2(numbers):\n    even = [n for n in numbers if n % 2 == 0]\n    odd = [n for n in numbers if n % 2 != 0]\n    return even, odd\n\nprint(get_even_and_odd_2([1, 2, 3, 4, 5]))"
+      },
+      {
+       "type": "numeric",
+       "prompt": "numbers 有 5 个数。用写法二，一共要做几次 `n % 2` 的判断？",
+       "answer": 10,
+       "tolerance": 0.001,
+       "explain": "每行推导式各检查 5 个数，5 × 2 = 10 次。写法一只要 5 次。",
+       "unit": "次",
+       "ref": [
+        {
+         "title": "写法一 get_even_and_odd_1",
+         "code": "def get_even_and_odd_1(numbers):\n    even = []\n    odd = []\n    for n in numbers:\n        if n % 2 == 0:\n            even.append(n)\n        else:\n            odd.append(n)\n    return even, odd"
+        },
+        {
+         "title": "写法二 get_even_and_odd_2",
+         "code": "def get_even_and_odd_2(numbers):\n    even = [n for n in numbers if n % 2 == 0]\n    odd = [n for n in numbers if n % 2 != 0]\n    return even, odd"
+        }
+       ]
+      },
+      {
+       "type": "numeric",
+       "prompt": "如果 numbers 有 1,000 个数，写法一要判断几次？",
+       "answer": 1000,
+       "tolerance": 0.001,
+       "explain": "写法一只循环一遍，每个数判断一次。写法二则是 2,000 次。",
+       "unit": "次",
+       "ref": [
+        {
+         "title": "写法一 get_even_and_odd_1",
+         "code": "def get_even_and_odd_1(numbers):\n    even = []\n    odd = []\n    for n in numbers:\n        if n % 2 == 0:\n            even.append(n)\n        else:\n            odd.append(n)\n    return even, odd"
+        },
+        {
+         "title": "写法二 get_even_and_odd_2",
+         "code": "def get_even_and_odd_2(numbers):\n    even = [n for n in numbers if n % 2 == 0]\n    odd = [n for n in numbers if n % 2 != 0]\n    return even, odd"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "title": "not in 的代价，以及怎么选",
+     "steps": [
+      {
+       "type": "card",
+       "title": "讲义的第一版写法",
+       "body": "讲义第 11 页，奇数那一行一开始写成了 `n not in even`：“不在偶数列表里的，就是奇数”。\n\n结果是对的。但每判断一个数，都要把 even **从头查一遍**。第 13 页改成了 `n % 2 != 0`。",
+       "code": "def get_even_and_odd_2(numbers):\n    even = [n for n in numbers if n % 2 == 0]\n    odd = [n for n in numbers if n not in even]\n    return even, odd"
+      },
+      {
+       "type": "card",
+       "title": "用 in 查列表：一个一个比",
+       "body": "对列表用 `in` 或 `not in` 时，Python 从第一个元素开始逐个比较，直到找到或比完。这叫**线性查找（linear search）**。\n\n列表越长，查一次就越慢。",
+       "equation": "3 not in [2, 4]\n  比较 3 和 2 → 不同\n  比较 3 和 4 → 不同\n  → True（比较了 2 次）",
+       "terms": [
+        [
+         "线性查找",
+         "linear search"
+        ]
+       ]
+      },
+      {
+       "type": "numeric",
+       "prompt": "even 是 `[2, 4, 6, 8, 10]`。判断 `9 not in even` 时，要比较几次？",
+       "answer": 5,
+       "tolerance": 0.001,
+       "explain": "9 不在列表里，所以要和 5 个元素都比一遍，才能确定“不在”。",
+       "unit": "次"
+      },
+      {
+       "type": "mcq",
+       "prompt": "为什么后来把 `n not in even` 改成 `n % 2 != 0`？",
+       "options": [
+        "算余数一步完成，不用每次翻整个列表",
+        "`not in` 是语法错误",
+        "`n not in even` 算出来的结果是错的",
+        "`!=` 能让两行推导式只循环一次"
+       ],
+       "answer": 0,
+       "why": [
+        "",
+        "`not in` 是合法写法，能正常运行。",
+        "对 [1, 2, 3, 4, 5] 两版结果完全一样。",
         "两行推导式仍然各循环一次，一共两次。"
        ],
-       "explain": "`not in` 每次都要在 `even` 里查找；算余数不需要。"
+       "explain": "`not in` 每次都在 even 里查找；算余数不需要查任何东西。",
+       "ref": [
+        {
+         "title": "第一版（not in）",
+         "code": "def get_even_and_odd_2(numbers):\n    even = [n for n in numbers if n % 2 == 0]\n    odd = [n for n in numbers if n not in even]\n    return even, odd"
+        },
+        {
+         "title": "改进版（% 2 != 0）",
+         "code": "def get_even_and_odd_2(numbers):\n    even = [n for n in numbers if n % 2 == 0]\n    odd = [n for n in numbers if n % 2 != 0]\n    return even, odd"
+        }
+       ]
+      },
+      {
+       "type": "tf",
+       "statement": "对 `[1, 2, 3, 4, 5]`，两个版本返回的结果完全相同。",
+       "answer": true,
+       "explain": "两版都返回 `([2, 4], [1, 3, 5])`。区别在做了多少额外的工作，不在结果。"
+      },
+      {
+       "type": "card",
+       "title": "到底哪个更好？先问“好在哪方面”",
+       "body": "讲义的结论：\n\n- **行数**：推导式更少\n- **循环次数**：写法二要循环两次\n- **速度**：推导式在 Python 内部更快，所以两者实际差别可能不大\n- **可读性（readability）**：别人（和以后的你）能一眼看懂，才是好代码",
+       "terms": [
+        [
+         "可读性",
+         "readability"
+        ],
+        [
+         "性能",
+         "performance"
+        ]
+       ]
       },
       {
        "type": "tf",
        "statement": "代码行数越少，程序一定越好。",
        "answer": false,
-       "explain": "讲义问的是“好在哪方面”：行数、速度、可读性要分开看。"
+       "explain": "讲义问的是“Better in terms of what?”：行数、速度、可读性要分开看。"
       },
       {
        "type": "mcq",
-       "prompt": "下面哪种情况，**更适合**用普通 for 循环而不是推导式？",
+       "prompt": "下面哪种情况，**更适合**用普通 for 循环？",
        "options": [
-        "一次循环里要同时往两个列表里放东西",
+        "一次循环里要同时往两个列表放东西",
         "把每个单词变成大写",
         "挑出所有长度大于 3 的单词",
         "把每个数乘以 10"
@@ -246,40 +866,89 @@
        "answer": 0,
        "why": [
         "",
-        "一个输入 → 一个新列表，正是推导式的强项。",
-        "这是“一个来源 + 一个条件 → 一个列表”，推导式很合适。",
+        "一个列表变成一个新列表，正是推导式的强项。",
+        "一个来源加一个条件，推导式很合适。",
         "简单变换，推导式一行搞定。"
        ],
-       "explain": "推导式适合“生成一个列表”。要分流到多个结果、或步骤很多时，普通循环更清楚。"
+       "explain": "推导式擅长“生成一个列表”。要分到多个结果里，或者步骤很多时，普通循环更清楚。"
       },
       {
-       "type": "tf",
-       "statement": "列表推导式在 Python 内部通常比 append 循环略快。",
-       "answer": true,
-       "explain": "这是讲义的结论之一。所以两遍推导式和一遍循环，速度差别往往不大，可读性更重要。"
+       "type": "match",
+       "prompt": "把情况和更合适的做法配对。",
+       "pairs": [
+        [
+         "一个列表 → 一个新列表",
+         "列表推导式"
+        ],
+        [
+         "一次循环分进两个列表",
+         "普通 for 循环"
+        ],
+        [
+         "只留下满足条件的元素",
+         "推导式加 if"
+        ],
+        [
+         "`n not in even`",
+         "每次都要查一遍列表"
+        ]
+       ],
+       "explain": "没有哪种写法永远更好，要看任务。"
       }
      ]
     }
    ]
   },
   {
-   "id": "u3",
-   "title": "enumerate",
+   "title": "enumerate：编号 + 元素",
    "description": "循环时同时拿到“第几个”和“是什么”。",
    "lessons": [
     {
-     "id": "u3-l1",
-     "title": "编号 + 元素",
+     "title": "enumerate 给每个元素配编号",
      "steps": [
       {
        "type": "card",
-       "title": "enumerate 给每个元素配编号",
-       "body": "`enumerate(words)` 每次给出一对：`(编号, 元素)`。\n\n`for i, word in ...` 把这一对**拆开**放进两个变量。编号默认从 **0** 开始。",
-       "equation": "0 this\n1 is\n2 a\n3 list\n4 of\n5 strings"
+       "title": "问题：循环时想知道“第几个”",
+       "body": "普通的 `for word in words` 只给你元素，不告诉你它在第几个位置。这个位置编号叫**索引（index）**，从 0 开始。\n\n初学者常这样写，能用，但要多写 `words[i]`：",
+       "code": "words = [\"this\", \"is\", \"a\", \"list\", \"of\", \"strings\"]\n\nfor i in range(len(words)):\n    print(i, words[i])",
+       "terms": [
+        [
+         "索引",
+         "index"
+        ],
+        [
+         "长度",
+         "len()"
+        ]
+       ]
+      },
+      {
+       "type": "card",
+       "title": "enumerate：同时给你编号和元素",
+       "body": "讲义第 20 页的写法。`enumerate(words)` 每次给出一对：(编号, 元素)。\n\n`for i, word in ...` 把这一对**拆开**，分别放进 i 和 word。这叫**解包（unpacking）**。编号默认从 0 开始。",
+       "code": "words = [\"this\", \"is\", \"a\", \"list\", \"of\", \"strings\"]\n\nfor i, word in enumerate(words):\n    print(i, word)",
+       "output": "0 this\n1 is\n2 a\n3 list\n4 of\n5 strings",
+       "terms": [
+        [
+         "枚举",
+         "enumerate"
+        ],
+        [
+         "解包",
+         "unpacking"
+        ]
+       ]
+      },
+      {
+       "type": "card",
+       "title": "拆开看：enumerate 到底给出了什么",
+       "body": "用 `list()` 把它全部展开，就能看到：每一项都是一个**元组（tuple）**。\n\n`i, word = (0, 'a')` 就是把元组解包成两个变量。",
+       "code": "print(list(enumerate([\"a\", \"b\", \"c\"])))",
+       "output": "[(0, 'a'), (1, 'b'), (2, 'c')]"
       },
       {
        "type": "mcq",
-       "prompt": "`words = [\"this\", \"is\", \"a\", \"list\", \"of\", \"strings\"]`。`for i, word in enumerate(words): print(i, word)` 打印的第 4 行是什么？",
+       "prompt": "这段代码打印的**第 4 行**是什么？",
        "options": [
         "`3 list`",
         "`4 list`",
@@ -290,72 +959,158 @@
        "why": [
         "",
         "编号从 0 开始，第 4 行的编号是 3。",
-        "第 4 个元素是 list，但编号是 3。",
-        "第 4 行编号是 3，对应 list；a 是第 3 行。"
+        "第 4 行的编号是 3，元素是 list。of 在第 5 行。",
+        "a 在第 3 行，编号是 2。"
        ],
-       "explain": "第 1 行编号 0，所以第 4 行编号 3，元素是 list。"
+       "explain": "第 1 行编号是 0，所以第 4 行编号是 3，对应 list。",
+       "code": "words = [\"this\", \"is\", \"a\", \"list\", \"of\", \"strings\"]\n\nfor i, word in enumerate(words):\n    print(i, word)"
+      },
+      {
+       "type": "mcq",
+       "prompt": "循环里加了一个 if。这段代码打印什么？",
+       "options": [
+        "`a`",
+        "`is`",
+        "`list`",
+        "`2`"
+       ],
+       "answer": 0,
+       "why": [
+        "",
+        "is 的编号是 1。",
+        "list 的编号是 3。",
+        "打印的是 word，不是 i。"
+       ],
+       "explain": "编号 2 对应第 3 个元素 a。",
+       "code": "words = [\"this\", \"is\", \"a\", \"list\", \"of\", \"strings\"]\n\nfor i, word in enumerate(words):\n    if i == 2:\n        print(word)"
       },
       {
        "type": "card",
        "title": "想从 1 开始数？用 start",
-       "body": "给人看的序号常常从 1 开始。加参数 `start=1`：\n\n只改编号，**不改**取到的元素。",
-       "equation": "list(enumerate([\"a\", \"b\"], start=1))\n→ [(1, 'a'), (2, 'b')]"
+       "body": "给人看的序号常常从 1 开始。加上**参数** `start=1`：\n\n它只改编号，**不改**取到的元素，第一个元素照样会被取到。",
+       "code": "for i, w in enumerate([\"a\", \"b\"], start=1):\n    print(i, w)",
+       "output": "1 a\n2 b"
+      },
+      {
+       "type": "tf",
+       "statement": "`enumerate(words, start=1)` 会让循环从第二个元素开始。",
+       "answer": false,
+       "explain": "start 只改编号的起点。所有元素都还在，第一个元素的编号变成 1。"
+      },
+      {
+       "type": "numeric",
+       "prompt": "这段代码最后打印的编号是多少？",
+       "answer": 8,
+       "tolerance": 0.001,
+       "explain": "4 个元素，编号从 5 开始：5、6、7、8。",
+       "code": "for i, w in enumerate([\"x\", \"y\", \"z\", \"w\"], start=5):\n    print(i, w)"
       },
       {
        "type": "match",
-       "prompt": "把写法和效果配对。",
+       "prompt": "把写法和它给你的东西配对。",
        "pairs": [
         [
          "`for w in words`",
-         "只拿元素"
+         "只有元素"
         ],
         [
          "`for i, w in enumerate(words)`",
-         "编号从 0 + 元素"
+         "从 0 开始的编号 + 元素"
         ],
         [
          "`enumerate(words, start=1)`",
-         "编号从 1 + 元素"
+         "从 1 开始的编号 + 元素"
         ],
         [
          "`for i in range(len(words))`",
-         "只拿编号"
+         "只有编号"
         ]
        ],
-       "explain": "需要编号时用 enumerate，比 `range(len(...))` 再取 `words[i]` 更直接。"
+       "explain": "需要编号又需要元素时，enumerate 最直接。"
+      }
+     ]
+    },
+    {
+     "title": "用编号看“前一个词”",
+     "steps": [
+      {
+       "type": "card",
+       "title": "讲义例子 2：words[i-1]",
+       "body": "有了编号 i，就能用 `words[i-1]` 取**前一个词**。\n\n在语言技术里，这常用来看一个词的**上下文（context）**，比如它前面是什么词。",
+       "code": "words = [\"this\", \"is\", \"a\", \"list\", \"of\", \"strings\"]\n\nfor i, word in enumerate(words):\n    print(i, word, words[i-1])",
+       "terms": [
+        [
+         "上下文",
+         "context"
+        ]
+       ]
       },
       {
        "type": "card",
-       "title": "用编号看“前一个词”",
-       "body": "有了编号 `i`，就能用 `words[i-1]` 取前一个词。在语言处理里，这常用来看词的上下文。\n\n但第一个词的 `i` 是 0，`i-1` 是 **-1**。",
-       "flag": {
-        "title": "Caveat",
-        "text": "讲义第 21 页没有提：Python 里 `words[-1]` 是**最后一个**元素，不会报错。所以第一行会把最后一个词当成“前一个词”。"
-       }
+       "title": "负索引：从末尾往前数",
+       "body": "Python 允许**负索引（negative index）**：`-1` 是最后一个，`-2` 是倒数第二个。",
+       "code": "words = [\"this\", \"is\", \"a\", \"list\", \"of\", \"strings\"]\nprint(words[-1])\nprint(words[-2])",
+       "output": "strings\nof",
+       "terms": [
+        [
+         "负索引",
+         "negative index"
+        ]
+       ]
       },
       {
        "type": "mcq",
-       "prompt": "`for i, word in enumerate(words): print(i, word, words[i-1])`，第一行打印什么？",
+       "prompt": "讲义这段代码打印的**第 1 行**是什么？",
        "options": [
         "`0 this strings`",
-        "报 `IndexError`",
+        "报错：`IndexError`",
         "`0 this None`",
         "`0 this this`"
        ],
        "answer": 0,
        "why": [
         "",
-        "负数下标是合法的，-1 表示倒数第一个。",
+        "负索引是合法的，-1 表示最后一个，不会报错。",
         "Python 不会自动给出 None。",
-        "`i-1` 是 -1，不是 0。"
+        "i - 1 是 -1，不是 0。"
        ],
-       "explain": "`words[-1]` 取最后一个词 strings，程序悄悄给出了错误的“前一个词”。"
+       "explain": "i 是 0 时，`words[-1]` 取到最后一个词 strings。",
+       "ref": {
+        "title": "words 列表",
+        "body": "课里 enumerate 的例子都用这个列表：",
+        "code": "words = [\"this\", \"is\", \"a\", \"list\", \"of\", \"strings\"]",
+        "output": "索引 index:  0      1     2    3       4     5\n元素:       this   is    a    list    of    strings"
+       },
+       "code": "for i, word in enumerate(words):\n    print(i, word, words[i-1])"
       },
       {
        "type": "tf",
-       "statement": "在 Python 里用 `words[-1]` 会报错，因为下标不能是负数。",
+       "statement": "在 Python 里写 `words[-1]` 会报错，因为索引不能是负数。",
        "answer": false,
-       "explain": "负下标从末尾往前数：-1 是最后一个，-2 是倒数第二个。"
+       "explain": "负索引从末尾往前数：-1 是最后一个，-2 是倒数第二个。"
+      },
+      {
+       "type": "card",
+       "title": "完整输出：第一行悄悄错了",
+       "body": "除了第一行，每一行的第三个词确实是前一个词。第一个词根本没有“前一个词”，程序却给了它 strings。",
+       "output": "0 this strings\n1 is this\n2 a is\n3 list a\n4 of list\n5 strings of",
+       "flag": {
+        "title": "讲义没提到的坑",
+        "text": "讲义第 21 页没有说明第一行的问题。程序不报错，所以很容易漏掉。"
+       }
+      },
+      {
+       "type": "numeric",
+       "prompt": "i 等于几时，`words[i-1]` 会取到“错误的前一个词”？",
+       "answer": 0,
+       "tolerance": 0.001,
+       "explain": "只有 i = 0 时，i - 1 = -1，绕到了列表末尾。",
+       "ref": {
+        "title": "words 列表",
+        "body": "课里 enumerate 的例子都用这个列表：",
+        "code": "words = [\"this\", \"is\", \"a\", \"list\", \"of\", \"strings\"]",
+        "output": "索引 index:  0      1     2    3       4     5\n元素:       this   is    a    list    of    strings"
+       }
       },
       {
        "type": "mcq",
@@ -364,54 +1119,139 @@
         "`prev = words[i-1] if i > 0 else None`",
         "把 `words[i-1]` 改成 `words[i+1]`",
         "把 `enumerate(words)` 改成 `enumerate(words, start=1)`",
-        "用 `words[i-1]` 之前先 `words.sort()`"
+        "先 `words.sort()` 再循环"
        ],
        "answer": 0,
        "why": [
         "",
-        "这取的是后一个词，最后一行还会 IndexError。",
+        "这取的是后一个词，而且最后一行会报 IndexError。",
         "start 只改编号，`words[i-1]` 会全部错位一格。",
-        "排序会打乱原文顺序，和问题无关。"
+        "排序会打乱原文的词序，和问题无关。"
        ],
-       "explain": "先判断 `i > 0`，第一个词就不会去取 `words[-1]`。"
+       "explain": "先判断 i > 0，第一个词就不会去取 `words[-1]`。这里用到了上一单元的条件表达式。"
+      },
+      {
+       "type": "tf",
+       "statement": "把 `words[i-1]` 改成 `words[i+1]` 来看后一个词，最后一行也会悄悄绕回列表开头。",
+       "answer": false,
+       "explain": "正索引不会绕回。最后一个词的 i + 1 = 6，超出范围，会报 `IndexError: list index out of range`。",
+       "ref": {
+        "title": "words 列表",
+        "body": "课里 enumerate 的例子都用这个列表：",
+        "code": "words = [\"this\", \"is\", \"a\", \"list\", \"of\", \"strings\"]",
+        "output": "索引 index:  0      1     2    3       4     5\n元素:       this   is    a    list    of    strings"
+       }
       }
      ]
     }
    ]
   },
   {
-   "id": "u4",
    "title": "NumPy 入门",
-   "description": "数组、维度，以及工作坊建议探索的方向（按 NumPy 2.5 编写）。",
+   "description": "数组（array）、维度，以及工作坊建议的四个主题。按 NumPy 2.5 编写。",
    "lessons": [
     {
-     "id": "u4-l1",
      "title": "NumPy 是什么",
      "steps": [
       {
        "type": "card",
-       "title": "专门算数字的库",
-       "body": "NumPy = **Num**erical **Py**thon，专门做数值计算。\n\n核心对象是**数组**（`ndarray`）。pandas 的每一列底层就常是 NumPy 数组。\n\n讲义提到：文本也能表示成数字，所以语言技术里处处用到它。"
+       "title": "NumPy = Numerical Python",
+       "body": "**NumPy** 是做**数值计算（numerical computation）**的 Python **库（library）**。\n\n它的核心是**数组（array）**，类型名是 `ndarray`（n-dimensional array，n 维数组）。\n\n数据分析和机器学习都离不开它，pandas 也建立在 NumPy 之上。讲义提到：文本也能表示成数字，所以语言技术里处处要用它。",
+       "terms": [
+        [
+         "库",
+         "library"
+        ],
+        [
+         "数值计算",
+         "numerical computation"
+        ],
+        [
+         "数组",
+         "array (ndarray)"
+        ],
+        [
+         "机器学习",
+         "machine learning"
+        ]
+       ]
       },
       {
        "type": "card",
        "title": "安装与导入",
-       "body": "命令行运行 `pip install numpy`（或 `pip3`）。\n\n导入时大家都约定简写成 `np`：",
-       "equation": "import numpy as np",
+       "body": "在**命令行（command line）**里安装，不是在 Python 里运行：",
+       "code": "pip install numpy\n# 或者\npip3 install numpy",
+       "codeCaption": "命令行 TERMINAL",
+       "terms": [
+        [
+         "命令行",
+         "command line / terminal"
+        ],
+        [
+         "导入",
+         "import"
+        ],
+        [
+         "别名",
+         "alias"
+        ]
+       ],
        "flag": {
-        "title": "Caveat",
-        "text": "讲义说不确定 Windows 能否用 pip。Windows 上通常写 `py -m pip install numpy`。在 Jupyter 里可以写 `%pip install numpy`。"
+        "title": "补充",
+        "text": "讲义说不确定 Windows 能不能这样装。Windows 上一般用 `py -m pip install numpy`；在 Jupyter 里可以写 `%pip install numpy`。"
        }
       },
       {
        "type": "card",
-       "title": "数组和列表最大的不同",
-       "body": "对数组做运算，会作用在**每个元素**上：\n\n列表的 `*` 是“重复”，数组的 `*` 是“逐个相乘”。",
-       "equation": "[1, 2, 3] * 2           → [1, 2, 3, 1, 2, 3]\nnp.array([1, 2, 3]) * 2 → [2 4 6]"
+       "title": "import numpy as np",
+       "body": "导入时，大家都约定给它起个**别名（alias）** `np`，后面就写 `np.array(...)`，不用每次写全名。\n\n注意：写了 `as np` 之后，代码里只有 `np` 这个名字，没有 `numpy`。",
+       "code": "import numpy as np"
       },
       {
        "type": "mcq",
-       "prompt": "`v = np.array([1, 2, 3])`，`v + v` 的结果是？",
+       "prompt": "写了 `import numpy as np` 之后，怎样创建数组？",
+       "options": [
+        "`np.array([1, 2, 3])`",
+        "`numpy.array([1, 2, 3])`",
+        "`np.array(1, 2, 3)`",
+        "`array([1, 2, 3])`"
+       ],
+       "answer": 0,
+       "why": [
+        "",
+        "用了别名后，只绑定了 `np` 这个名字，写 `numpy` 会报 NameError。",
+        "三个数要先放进一个列表（方括号）里，再交给 np.array。",
+        "array 在 np 里面，前面要加 `np.`。"
+       ],
+       "explain": "别名 np 就是 NumPy 本身，用 `np.` 去调用它的函数。"
+      },
+      {
+       "type": "card",
+       "title": "第一个数组",
+       "body": "讲义第 28 页：用 `np.array()` 把列表变成数组。\n\n打印数组时，元素之间是**空格**，没有逗号。这是分辨数组和列表的一个小线索。",
+       "code": "import numpy as np\n\nmy_vector = np.array([1, 2, 3])\nprint(my_vector)",
+       "output": "[1 2 3]"
+      },
+      {
+       "type": "card",
+       "title": "最大的不同：运算作用于每个元素",
+       "body": "对数组做运算，会作用在**每个元素**上。这叫**逐元素（element-wise）**运算，也叫**向量化（vectorized）**运算。\n\n列表的 `*` 是“重复”，数组的 `*` 是“每个都乘”。",
+       "code": "lst = [1, 2, 3]\narr = np.array([1, 2, 3])\n\nprint(lst * 2)\nprint(arr * 2)\nprint(arr + arr)",
+       "output": "[1, 2, 3, 1, 2, 3]\n[2 4 6]\n[2 4 6]",
+       "terms": [
+        [
+         "逐元素",
+         "element-wise"
+        ],
+        [
+         "向量化运算",
+         "vectorized operation"
+        ]
+       ]
+      },
+      {
+       "type": "mcq",
+       "prompt": "数组加数组，打印什么？",
        "options": [
         "`[2 4 6]`",
         "`[1 2 3 1 2 3]`",
@@ -421,27 +1261,45 @@
        "answer": 0,
        "why": [
         "",
-        "这是列表 `+` 的拼接效果，数组是逐元素相加。",
-        "这是把所有元素加起来，要用 `v.sum()`。",
+        "这是列表 `+` 的拼接效果。数组是对应位置相加。",
+        "把所有元素加起来要用 `v.sum()`。",
         "数组支持 +、-、*、/ 等运算。"
        ],
-       "explain": "数组对应位置相加：1+1, 2+2, 3+3。"
+       "explain": "对应位置相加：1+1、2+2、3+3。",
+       "code": "v = np.array([1, 2, 3])\nprint(v + v)"
       },
       {
        "type": "tf",
-       "statement": "`print(np.array([1, 2, 3]))` 显示为 `[1, 2, 3]`，和列表一样带逗号。",
+       "statement": "`print(np.array([1, 2, 3]))` 显示为 `[1, 2, 3]`，和列表一样有逗号。",
        "answer": false,
-       "explain": "数组打印时用空格分隔：`[1 2 3]`。看有没有逗号，可以分辨是数组还是列表。"
+       "explain": "数组打印时用空格分隔：`[1 2 3]`。"
+      },
+      {
+       "type": "card",
+       "title": "为什么数组更快（先有个直觉）",
+       "body": "讲义说原因下一门课再讲。先记住三点：\n\n- 数组里的元素是**同一种数据类型（dtype）**，比如都是整数\n- 它们在内存里紧挨着存放\n- 运算由底层的 C 代码一次做完，不用 Python 一个个循环\n\n只要有一个小数，整个数组都会变成小数类型：",
+       "code": "print(np.array([1, 2, 3]).dtype)\nprint(np.array([1, 2.5]).dtype)",
+       "output": "int64\nfloat64",
+       "terms": [
+        [
+         "数据类型",
+         "dtype (data type)"
+        ],
+        [
+         "整数 / 浮点数",
+         "int / float"
+        ]
+       ]
       },
       {
        "type": "tf",
-       "statement": "一个 NumPy 数组里的元素通常是同一种类型，比如全是整数或全是小数。",
-       "answer": true,
-       "explain": "`np.array([1, 2.5])` 会把 1 也变成小数，dtype 是 `float64`。类型统一正是数组快的原因之一。"
+       "statement": "在 `np.array([1, 2.5])` 里，1 仍然是整数类型。",
+       "answer": false,
+       "explain": "数组要求类型统一。1 会变成 1.0，整个数组的 dtype 是 float64。"
       },
       {
        "type": "mcq",
-       "prompt": "讲义说处理数字时 NumPy 比列表更合适，主要原因是？",
+       "prompt": "讲义说处理数字时，NumPy 比列表更合适。主要原因是什么？",
        "options": [
         "更高效，还能一次对整个数组做运算",
         "列表不能存数字",
@@ -460,56 +1318,97 @@
      ]
     },
     {
-     "id": "u4-l2",
-     "title": "维度：ndim 和 shape",
+     "title": "维度：标量、向量、矩阵、张量",
      "steps": [
       {
        "type": "card",
-       "title": "四个名字，按“几层”区分",
-       "body": "- **标量**：一个数，0 维\n- **向量**：一排数，1 维\n- **矩阵**：行 × 列，2 维\n- **张量**：3 维及以上\n\n数一数最外面有几层方括号，就是几维。",
-       "equation": "5   [1,2,3]   [[1,2],[3,4]]   [[[...]]]\n0维    1维        2维          3维"
+       "title": "四个名字，按“几维”区分",
+       "body": "讲义第 29 页：\n\n- **标量（scalar）**：单独一个数，0 维\n- **向量（vector）**：一排数，1 维\n- **矩阵（matrix）**：有行有列，2 维\n- **张量（tensor）**：3 维或更多维",
+       "code": "np.array(5)                  # 0 维\nnp.array([1, 2, 3])          # 1 维\nnp.array([[1, 2], [3, 4]])   # 2 维",
+       "terms": [
+        [
+         "标量",
+         "scalar"
+        ],
+        [
+         "向量",
+         "vector"
+        ],
+        [
+         "矩阵",
+         "matrix"
+        ],
+        [
+         "张量",
+         "tensor"
+        ],
+        [
+         "维度",
+         "dimension"
+        ]
+       ]
       },
       {
        "type": "card",
-       "title": "ndim 是几维，shape 是每维多长",
-       "body": "- `a.ndim`：有几个维度（轴）\n- `a.shape`：每个维度有多长，是一个元组\n- `a.size`：元素总数\n\n讲义的 3×3 矩阵：",
-       "equation": "m = np.array([[1,2,3],[4,5,6],[7,8,9]])\nm.ndim → 2    m.shape → (3, 3)    m.size → 9"
+       "title": "一个简单的数法：数开头的方括号",
+       "body": "从最外层往里数，开头有几个**连续的** `[`，就是几维。",
+       "equation": "5              → 0 个 [  → 0 维\n[1, 2, 3]      → 1 个 [  → 1 维\n[[1, 2], ...]  → 2 个 [  → 2 维\n[[[1], ...]]]  → 3 个 [  → 3 维"
       },
       {
        "type": "match",
-       "prompt": "把数组和它的 `ndim` 配对。",
+       "prompt": "把数组和它是几维配对。",
        "pairs": [
         [
          "`np.array(5)`",
-         "0"
+         "0 维 · 标量 scalar"
         ],
         [
          "`np.array([1, 2, 3])`",
-         "1"
+         "1 维 · 向量 vector"
         ],
         [
          "`np.array([[1, 2], [3, 4]])`",
-         "2"
+         "2 维 · 矩阵 matrix"
         ],
         [
          "`np.array([[[1], [2]]])`",
-         "3"
+         "3 维 · 张量 tensor"
         ]
        ],
-       "explain": "数最外层到最内层的方括号层数。"
+       "explain": "数开头连续的方括号层数。"
       },
       {
        "type": "card",
-       "title": "讲义里“维度”的说法容易混",
-       "body": "讲义说 2×3 矩阵“行方向 2 维、列方向 3 维”。\n\n在 NumPy 里更准确的说法是：它有 **2 个维度**（`ndim` = 2），**形状**是 (2, 3)，即 2 行 3 列。",
-       "flag": {
-        "title": "Source correction",
-        "text": "讲义第 30 页把“维度数”和“每个维度的长度”混为一谈。NumPy 中：维度数看 `ndim`，长度看 `shape`。2×3 矩阵是 2 维，不是“2 维和 3 维”。"
-       }
+       "title": "三个属性：ndim、shape、size",
+       "body": "- `ndim`：有几个维度。每个维度也叫一条**轴（axis）**\n- `shape`：每个维度有多长，是一个元组\n- `size`：元素一共有几个\n\n它们是数组的**属性（attribute）**，后面不加括号。",
+       "code": "m = np.array([[1, 2, 3],\n              [4, 5, 6],\n              [7, 8, 9]])\n\nprint(m.ndim)\nprint(m.shape)\nprint(m.size)",
+       "output": "2\n(3, 3)\n9",
+       "terms": [
+        [
+         "维度数",
+         "ndim"
+        ],
+        [
+         "形状",
+         "shape"
+        ],
+        [
+         "元素总数",
+         "size"
+        ],
+        [
+         "轴",
+         "axis"
+        ],
+        [
+         "属性",
+         "attribute"
+        ]
+       ]
       },
       {
        "type": "mcq",
-       "prompt": "`np.array([[1, 2, 3], [4, 5, 6]]).shape` 是什么？",
+       "prompt": "这个数组的 `shape` 是什么？",
        "options": [
         "`(2, 3)`",
         "`(3, 2)`",
@@ -519,52 +1418,126 @@
        "answer": 0,
        "why": [
         "",
-        "shape 先写行数再写列数。这里 2 行、每行 3 个。",
+        "shape 先写行数，再写列数。这里是 2 行、每行 3 个。",
         "这是 ndim，不是 shape。",
         "这是 size，元素总数。"
        ],
-       "explain": "2 行 3 列，shape 写成 (行, 列) = (2, 3)。"
+       "explain": "2 行 3 列，shape 写成 (行, 列) = (2, 3)。",
+       "code": "a = np.array([[1, 2, 3],\n              [4, 5, 6]])\nprint(a.shape)"
       },
       {
-       "type": "numeric",
-       "prompt": "讲义的张量有 2 块，每块 3 行 4 列（数字 1 到 24）。它的 `ndim` 是多少？",
-       "answer": 3,
-       "tolerance": 0.001,
-       "explain": "有三层方括号，shape 是 (2, 3, 4)，所以 ndim = 3。"
-      },
-      {
-       "type": "numeric",
-       "prompt": "shape 为 (2, 3, 4) 的数组，`size`（元素总数）是多少？",
-       "answer": 24,
-       "tolerance": 0.001,
-       "unit": "个",
-       "explain": "2 × 3 × 4 = 24，正好是数字 1 到 24。"
+       "type": "card",
+       "title": "讲义里有一句话容易让人混淆",
+       "body": "讲义第 30 页原文：*“a 2x3 matrix has 2 dimensions along its rows and 3 dimensions along its columns”*。\n\n在 NumPy 里更准确的说法是：它有 **2 个维度**（`ndim` 是 2），**形状**是 (2, 3)，也就是 2 行 3 列。",
+       "code": "a = np.array([[1, 2, 3],\n              [4, 5, 6]])\nprint(a.ndim)\nprint(a.shape)",
+       "output": "2\n(2, 3)",
+       "flag": {
+        "title": "讲义更正",
+        "text": "这句话把“有几个维度”和“每个维度有多长”混在一起了。几个维度看 `ndim`，每个维度多长看 `shape`。2×3 矩阵是 2 维的，不是“2 维加 3 维”。"
+       }
       },
       {
        "type": "tf",
-       "statement": "`np.array([1, 2, 3])` 是一个列向量，shape 是 (3, 1)。",
+       "statement": "2×3 矩阵的 `ndim` 是 3。",
        "answer": false,
-       "explain": "一维数组的 shape 是 (3,)，既不算行也不算列。(3, 1) 是一个 2 维数组。",
+       "explain": "ndim 是 2（行和列两个维度）。3 是第二个维度的长度，出现在 shape 里。"
+      },
+      {
+       "type": "card",
+       "title": "张量：讲义第 32 页的例子",
+       "body": "这个张量有 2 **块（block）**，每块 3 行 4 列。\n\nshape 从外往里读：(块数, 行数, 列数)。",
+       "code": "tensor = np.array([[[1, 2, 3, 4],\n                    [5, 6, 7, 8],\n                    [9, 10, 11, 12]],\n                   [[13, 14, 15, 16],\n                    [17, 18, 19, 20],\n                    [21, 22, 23, 24]]])\n\nprint(tensor.shape)",
+       "output": "(2, 3, 4)"
+      },
+      {
+       "type": "numeric",
+       "prompt": "讲义这个张量的 `ndim` 是多少？",
+       "answer": 3,
+       "tolerance": 0.001,
+       "explain": "开头有三层方括号，shape 是 (2, 3, 4)，有 3 个数字，所以 ndim = 3。",
+       "ref": {
+        "title": "讲义的张量 tensor",
+        "body": "2 块（block），每块 3 行 4 列，数字 1 到 24。",
+        "code": "tensor = np.array([[[1, 2, 3, 4],\n                    [5, 6, 7, 8],\n                    [9, 10, 11, 12]],\n                   [[13, 14, 15, 16],\n                    [17, 18, 19, 20],\n                    [21, 22, 23, 24]]])"
+       }
+      },
+      {
+       "type": "numeric",
+       "prompt": "shape 是 (2, 3, 4) 的数组，`size` 是多少？",
+       "answer": 24,
+       "tolerance": 0.001,
+       "explain": "2 × 3 × 4 = 24，正好是数字 1 到 24。",
+       "unit": "个"
+      },
+      {
+       "type": "tf",
+       "statement": "`np.array([1, 2, 3])` 的 shape 是 (3, 1)。",
+       "answer": false,
+       "explain": "一维数组的 shape 是 `(3,)`，只有一个数字。(3, 1) 是 3 行 1 列的二维数组。",
        "flag": {
-        "title": "Caveat",
-        "text": "讲义说向量“有一个维度（行或列）”。数学上可以区分行向量和列向量；NumPy 的一维数组不区分，要区分时需变成 2 维。"
+        "title": "注意",
+        "text": "讲义说向量“有一个维度（行或列）”。数学上会区分行向量和列向量，但 NumPy 的一维数组不分行列。需要区分时，要把它变成二维。"
        }
       }
      ]
     },
     {
-     "id": "u4-l3",
-     "title": "工作坊热身：索引与 reshape",
+     "title": "工作坊热身：索引（indexing）",
      "steps": [
       {
        "type": "card",
+       "title": "工作坊在做什么",
+       "body": "讲义最后是小组**工作坊（workshop）**：每组找一个在线教程（tutorial），自学 NumPy 的一个主题，再讲给大家听。\n\n讲义建议的主题：**索引 Indexing**、**乘法 Multiplication**、**Transform**、**变形 Reshape**。这一关和下一关把它们各练一遍。",
+       "flag": {
+        "title": "说明",
+        "text": "讲义写的是 “Transform”。NumPy 里没有叫 transform 的基础函数，最可能指的是**转置（transpose）**，下一关按转置来讲。"
+       }
+      },
+      {
+       "type": "card",
+       "title": "一维索引：和列表一样",
+       "body": "- 索引从 0 开始\n- 负索引从末尾数\n- **切片（slice）** `a:b` 取 a 到 b−1，不包括 b",
+       "code": "v = np.array([10, 20, 30, 40])\n\nprint(v[0])\nprint(v[-1])\nprint(v[1:3])",
+       "output": "10\n40\n[20 30]",
+       "terms": [
+        [
+         "索引",
+         "indexing"
+        ],
+        [
+         "切片",
+         "slicing"
+        ]
+       ]
+      },
+      {
+       "type": "numeric",
+       "prompt": "`v[2]` 打印出来是多少？",
+       "answer": 30,
+       "tolerance": 0.001,
+       "explain": "索引 2 是第 3 个元素 30。",
+       "code": "v = np.array([10, 20, 30, 40])\nprint(v[2])"
+      },
+      {
+       "type": "card",
        "title": "二维索引：[行, 列]",
-       "body": "从 0 开始数。用逗号分开行和列：\n\n- `m[1, 2]`：第 1 号行、第 2 号列\n- `m[0]`：整个第 0 行\n- `m[:, 1]`：所有行的第 1 号列\n\n这和 pandas 的 `iloc` 思路一样。",
-       "equation": "m = [[1 2 3]\n     [4 5 6]\n     [7 8 9]]"
+       "body": "用逗号分开**行（row）**和**列（column）**，都从 0 数：\n\n- `m[1, 2]`：第 1 行、第 2 列\n- `m[0]`：整个第 0 行\n- `m[:, 1]`：`:` 表示“所有行”，取第 1 列\n\n和 pandas 的 `iloc` 是同一个思路。",
+       "code": "m = np.array([[1, 2, 3],\n              [4, 5, 6],\n              [7, 8, 9]])\n\nprint(m[1, 2])\nprint(m[0])\nprint(m[:, 1])",
+       "output": "6\n[1 2 3]\n[2 5 8]",
+       "terms": [
+        [
+         "行",
+         "row"
+        ],
+        [
+         "列",
+         "column"
+        ]
+       ]
       },
       {
        "type": "mcq",
-       "prompt": "用上面的 `m`，`m[:, 1]` 得到什么？",
+       "prompt": "`m[:, 1]` 得到什么？",
        "options": [
         "`[2 5 8]`",
         "`[4 5 6]`",
@@ -574,24 +1547,157 @@
        "answer": 0,
        "why": [
         "",
-        "这是 `m[1]`，第 1 号**行**。",
-        "这是 `m[:, 0]`，第 0 号列。",
+        "这是 `m[1]`，第 1 **行**。",
+        "这是 `m[:, 0]`，第 0 列。",
         "这是 `m[1, 1]`，单个元素。"
        ],
-       "explain": "`:` 表示所有行，`1` 表示第 1 号列，取出中间那一列。"
+       "explain": "`:` 表示所有行，1 表示第 1 列，也就是中间那一列。",
+       "code": "m = np.array([[1, 2, 3],\n              [4, 5, 6],\n              [7, 8, 9]])\nprint(m[:, 1])"
       },
       {
        "type": "numeric",
-       "prompt": "`m` 同上，`m[1, 2]` 的值是多少？",
-       "answer": 6,
+       "prompt": "`m[2, 0]` 是多少？",
+       "answer": 7,
        "tolerance": 0.001,
-       "explain": "第 1 号行是 [4 5 6]，其中第 2 号是 6。"
+       "explain": "第 2 行是 [7 8 9]，其中第 0 个是 7。",
+       "code": "m = np.array([[1, 2, 3],\n              [4, 5, 6],\n              [7, 8, 9]])\nprint(m[2, 0])"
+      },
+      {
+       "type": "numeric",
+       "prompt": "讲义的张量 `tensor[1, 0, 2]` 是多少？（第 1 块、第 0 行、第 2 列）",
+       "answer": 15,
+       "tolerance": 0.001,
+       "explain": "第 1 块从 13 开始，它的第 0 行是 [13 14 15 16]，第 2 个是 15。",
+       "ref": {
+        "title": "讲义的张量 tensor",
+        "body": "2 块（block），每块 3 行 4 列，数字 1 到 24。",
+        "code": "tensor = np.array([[[1, 2, 3, 4],\n                    [5, 6, 7, 8],\n                    [9, 10, 11, 12]],\n                   [[13, 14, 15, 16],\n                    [17, 18, 19, 20],\n                    [21, 22, 23, 24]]])"
+       }
+      },
+      {
+       "type": "tf",
+       "statement": "对 NumPy 数组，`m[1][2]` 和 `m[1, 2]` 得到的值一样。",
+       "answer": true,
+       "explain": "`m[1][2]` 先取出第 1 行，再取其中第 2 个，结果也是 6。NumPy 更推荐用逗号的写法，一步到位。",
+       "ref": {
+        "title": "矩阵 m",
+        "code": "m = np.array([[1, 2, 3],\n              [4, 5, 6],\n              [7, 8, 9]])\nprint(m)",
+        "output": "[[1 2 3]\n [4 5 6]\n [7 8 9]]"
+       }
+      }
+     ]
+    },
+    {
+     "title": "工作坊热身：乘法、转置、reshape",
+     "steps": [
+      {
+       "type": "card",
+       "title": "两种乘法（multiplication）",
+       "body": "- `*`：**逐元素相乘（element-wise）**，对应位置相乘\n- `@`：**矩阵乘法（matrix multiplication）**。对两个向量来说就是**点积（dot product）**：对应相乘再相加\n\n下面的点积：1×4 + 2×5 + 3×6 = 32。",
+       "code": "a = np.array([1, 2, 3])\nb = np.array([4, 5, 6])\n\nprint(a * b)\nprint(a @ b)",
+       "output": "[ 4 10 18]\n32",
+       "terms": [
+        [
+         "逐元素相乘",
+         "element-wise product (*)"
+        ],
+        [
+         "矩阵乘法",
+         "matrix multiplication (@)"
+        ],
+        [
+         "点积",
+         "dot product"
+        ]
+       ]
+      },
+      {
+       "type": "mcq",
+       "prompt": "用 `*` 相乘，打印什么？",
+       "options": [
+        "`[ 8 15]`",
+        "`23`",
+        "`[2 3 4 5]`",
+        "`[ 6 8]`"
+       ],
+       "answer": 0,
+       "why": [
+        "",
+        "这是 `@`（点积）的结果：8 + 15。",
+        "这是列表 `+` 的拼接效果。",
+        "这是逐元素**相加**：2+4、3+5。"
+       ],
+       "explain": "`*` 对应位置相乘：2×4 = 8，3×5 = 15。",
+       "code": "a = np.array([2, 3])\nb = np.array([4, 5])\nprint(a * b)"
+      },
+      {
+       "type": "numeric",
+       "prompt": "用 `@` 相乘，打印出来是多少？",
+       "answer": 11,
+       "tolerance": 0.001,
+       "explain": "点积：1×3 + 2×4 = 3 + 8 = 11。",
+       "code": "a = np.array([1, 2])\nb = np.array([3, 4])\nprint(a @ b)"
+      },
+      {
+       "type": "card",
+       "title": "数组和一个数运算：广播（broadcasting）",
+       "body": "数组和单独一个数运算时，这个数会作用到**每个元素**上。NumPy 管这叫**广播（broadcasting）**。",
+       "code": "m = np.array([[1, 2, 3],\n              [4, 5, 6],\n              [7, 8, 9]])\nprint(m * 10)",
+       "output": "[[10 20 30]\n [40 50 60]\n [70 80 90]]",
+       "terms": [
+        [
+         "广播",
+         "broadcasting"
+        ]
+       ]
+      },
+      {
+       "type": "card",
+       "title": "转置（transpose）：行列互换",
+       "body": "`.T` 把行变成列、列变成行。2 行 3 列转置后变成 3 行 2 列。",
+       "code": "a = np.array([[1, 2, 3],\n              [4, 5, 6]])\nprint(a.T)\nprint(a.T.shape)",
+       "output": "[[1 4]\n [2 5]\n [3 6]]\n(3, 2)",
+       "terms": [
+        [
+         "转置",
+         "transpose (.T)"
+        ]
+       ]
+      },
+      {
+       "type": "mcq",
+       "prompt": "一个数组的 shape 是 (2, 5)。它的 `.T` 的 shape 是什么？",
+       "options": [
+        "`(5, 2)`",
+        "`(2, 5)`",
+        "`(10,)`",
+        "`(5, 5)`"
+       ],
+       "answer": 0,
+       "why": [
+        "",
+        "转置会交换行数和列数。",
+        "转置不会把数组拉平成一维。",
+        "转置只交换，不会改变元素总数。"
+       ],
+       "explain": "行列互换：2 行 5 列 → 5 行 2 列。"
       },
       {
        "type": "card",
        "title": "reshape：换个形状，元素不变",
-       "body": "`reshape` 把同样的元素按新形状重新排。元素总数必须不变。\n\n`np.arange(6)` 生成 0 到 5：",
-       "equation": "np.arange(6).reshape(2, 3)\n→ [[0 1 2]\n   [3 4 5]]"
+       "body": "`np.arange(6)` 生成 0 到 5（和 `range` 类似）。\n\n`reshape` 按原来的顺序，**一行一行**填进新形状。新形状的元素总数必须和原来一样。",
+       "code": "a = np.arange(6)\nprint(a)\nprint(a.reshape(2, 3))",
+       "output": "[0 1 2 3 4 5]\n[[0 1 2]\n [3 4 5]]",
+       "terms": [
+        [
+         "变形",
+         "reshape"
+        ],
+        [
+         "等差序列",
+         "np.arange"
+        ]
+       ]
       },
       {
        "type": "mcq",
@@ -599,30 +1705,58 @@
        "options": [
         "报错：4 × 2 = 8，和 6 个元素对不上",
         "自动补两个 0",
-        "只取前 6 个位置",
-        "变成 shape (2, 3)"
+        "只填前 6 个位置，其余留空",
+        "自动改成 (2, 3)"
        ],
        "answer": 0,
        "why": [
         "",
         "reshape 不会自己补数。",
-        "没有这种“部分填满”的行为。",
+        "数组没有“空位”，每个位置都必须有值。",
         "reshape 不会替你改形状。"
        ],
-       "explain": "新形状的乘积必须等于元素总数：6 只能变成 (1,6)、(2,3)、(3,2)、(6,1) 等。"
+       "explain": "新形状的乘积必须等于元素总数：6 只能变成 (1, 6)、(2, 3)、(3, 2)、(6, 1) 等。"
       },
       {
-       "type": "numeric",
-       "prompt": "讲义的张量是 `np.arange(1, 25).reshape(2, 3, 4)`。`t[1, 0, 2]` 是多少？（第 1 号块、第 0 号行、第 2 号列）",
-       "answer": 15,
-       "tolerance": 0.001,
-       "explain": "第 1 号块从 13 开始，第 0 行是 [13 14 15 16]，第 2 号是 15。"
+       "type": "mcq",
+       "prompt": "`np.arange(6).reshape(3, 2)` 的结果是哪一个？",
+       "options": [
+        "`[[0 1] [2 3] [4 5]]`",
+        "`[[0 3] [1 4] [2 5]]`",
+        "`[[0 1 2] [3 4 5]]`",
+        "`[[0 2 4] [1 3 5]]`"
+       ],
+       "answer": 0,
+       "why": [
+        "",
+        "这是先填列的结果。reshape 默认一行一行地填。",
+        "这是 (2, 3) 的形状，不是 (3, 2)。",
+        "这是把 (2, 3) 的结果再转置，不是直接 reshape。"
+       ],
+       "explain": "3 行 2 列，按顺序一行放两个：0 1、2 3、4 5。"
       },
       {
-       "type": "tf",
-       "statement": "`np.array([1, 2, 3]) * np.array([4, 5, 6])` 的结果是 `[4 10 18]`。",
-       "answer": true,
-       "explain": "`*` 是对应位置相乘：1×4、2×5、3×6。矩阵乘法要用 `@`，可作为工作坊里“Multiplication”的探索题。"
+       "type": "match",
+       "prompt": "把写法和它做的事配对。",
+       "pairs": [
+        [
+         "`a * b`",
+         "对应位置相乘"
+        ],
+        [
+         "`a @ b`",
+         "矩阵乘法 / 点积"
+        ],
+        [
+         "`m.T`",
+         "行列互换"
+        ],
+        [
+         "`a.reshape(2, 3)`",
+         "换成 2 行 3 列"
+        ]
+       ],
+       "explain": "这四个就是工作坊建议的热身主题。"
       }
      ]
     }
